@@ -136,6 +136,7 @@
     <button class="active" onclick="setType('song')">Songs</button>
     <button onclick="setType('movie')">Filme</button>
     <button onclick="setType('mundart')">Mundart</button>
+    <button onclick="setType('event')">Ereignisse</button>
   </div>
 
   <label id="labelSearch">Such en <span id="typeLabel">Song</span></label>
@@ -429,6 +430,95 @@ const knownMundart = {
   2025: [["Füürtüüfeli","Kunz"],["079","Lo & Leduc"],["Heiterefahne","Trauffer"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Bälpmoos","Züri West"]],
 };
 
+const knownEvents = {
+  1940: [["Blitzkrieg on London begins"],["McDonald's founded"],["Charlie Chaplin's The Great Dictator"],["First electron microscope demonstrated"],["France falls to Nazi Germany"]],
+  1941: [["Pearl Harbor attack"],["Germany invades Soviet Union"],["Mount Rushmore completed"],["Cheerios cereal introduced"],["Manhattan Project begins"]],
+  1942: [["Battle of Midway"],["First nuclear reactor (Chicago Pile-1)"],["Battle of Stalingrad begins"],["Anne Frank begins her diary"],["Casablanca film premieres"]],
+  1943: [["Allies invade Sicily"],["Pentagon building completed"],["Warsaw Ghetto Uprising"],["LSD effects discovered"],["Colossus code-breaking computer built"]],
+  1944: [["D-Day: Normandy landings"],["Liberation of Paris"],["Bretton Woods Conference"],["Battle of the Bulge"],["Anne Frank captured"]],
+  1945: [["Atomic bombs on Hiroshima & Nagasaki"],["WWII ends"],["United Nations founded"],["Hitler dies in bunker"],["Nuremberg Trials begin"]],
+  1946: [["ENIAC: first general-purpose computer"],["UNICEF established"],["Bikini Atoll nuclear tests"],["First Cannes Film Festival"],["Baby Boom begins"]],
+  1947: [["India gains independence"],["Dead Sea Scrolls discovered"],["Roswell UFO incident"],["Marshall Plan announced"],["Sound barrier broken (Chuck Yeager)"]],
+  1948: [["State of Israel founded"],["NHS established in UK"],["Berlin Blockade & Airlift"],["Universal Declaration of Human Rights"],["Polaroid camera released"]],
+  1949: [["NATO formed"],["People's Republic of China founded"],["Soviet Union tests atomic bomb"],["George Orwell publishes 1984"],["Apartheid begins in South Africa"]],
+  1950: [["Korean War begins"],["First credit card (Diners Club)"],["First organ transplant"],["Peanuts comic strip debuts"],["Tibet invaded by China"]],
+  1951: [["Color TV introduced in US"],["First nuclear power plant"],["ANZUS treaty signed"],["J.D. Salinger publishes Catcher in the Rye"],["First Miss World pageant"]],
+  1952: [["Queen Elizabeth II ascends throne"],["First hydrogen bomb test"],["Polio epidemic peaks"],["First passenger jet (de Havilland Comet)"],["Mr. Potato Head: first toy on TV"]],
+  1953: [["DNA structure discovered (Watson & Crick)"],["Mount Everest first summited"],["Korean War ends"],["Stalin dies"],["Coronation of Queen Elizabeth II"]],
+  1954: [["Brown v. Board of Education"],["First nuclear submarine (USS Nautilus)"],["Roger Bannister breaks 4-minute mile"],["Vietnam War begins"],["First Burger King opens"]],
+  1955: [["Rosa Parks & Montgomery Bus Boycott"],["Disneyland opens"],["Einstein dies"],["McDonald's franchise begins"],["Warsaw Pact formed"]],
+  1956: [["Suez Crisis"],["Hungarian Revolution"],["Elvis appears on Ed Sullivan Show"],["Interstate Highway Act signed"],["Grace Kelly marries Prince Rainier"]],
+  1957: [["Sputnik launched — Space Age begins"],["European Economic Community founded"],["Little Rock Nine school integration"],["Dr. Seuss publishes Cat in the Hat"],["Frisbee invented"]],
+  1958: [["NASA established"],["European Common Market begins"],["First transatlantic jet service"],["Peace symbol designed"],["Hula Hoop craze"]],
+  1959: [["Cuban Revolution — Castro takes power"],["Hawaii becomes 50th US state"],["Barbie doll launched"],["Antarctic Treaty signed"],["Dalai Lama flees Tibet"]],
+  1960: [["JFK elected president"],["First laser built"],["Sit-in movement begins"],["U-2 spy plane incident"],["Birth control pill approved"]],
+  1961: [["Berlin Wall built"],["Yuri Gagarin: first human in space"],["Bay of Pigs invasion"],["Freedom Rides begin"],["WWF (conservation) founded"]],
+  1962: [["Cuban Missile Crisis"],["John Glenn orbits Earth"],["James Bond Dr. No premieres"],["Marilyn Monroe dies"],["Beatles release first single"]],
+  1963: [["JFK assassinated"],["Martin Luther King's 'I Have a Dream' speech"],["Beatlemania begins"],["First push-button telephone"],["Valentina Tereshkova: first woman in space"]],
+  1964: [["Civil Rights Act signed"],["Nelson Mandela sentenced to life"],["Beatlemania hits America"],["Tokyo Olympics"],["Ford Mustang launched"]],
+  1965: [["First spacewalk (Alexei Leonov)"],["Malcolm X assassinated"],["Voting Rights Act signed"],["Sound of Music released"],["Great Blackout of Northeast US"]],
+  1966: [["Cultural Revolution begins in China"],["Star Trek debuts"],["England wins FIFA World Cup"],["Black Panther Party founded"],["Miranda Rights established"]],
+  1967: [["Summer of Love"],["First heart transplant"],["Six-Day War"],["Thurgood Marshall: first Black Supreme Court Justice"],["Beatles release Sgt. Pepper's"]],
+  1968: [["Martin Luther King Jr. assassinated"],["Apollo 8 orbits the Moon"],["Prague Spring crushed"],["Robert F. Kennedy assassinated"],["2001: A Space Odyssey released"]],
+  1969: [["Moon landing — Apollo 11"],["Woodstock festival"],["Internet (ARPANET) created"],["Stonewall Riots"],["Concorde's first flight"]],
+  1970: [["First Earth Day"],["Beatles break up"],["Boeing 747 first commercial flight"],["Kent State shootings"],["Floppy disk invented"]],
+  1971: [["Intel releases first microprocessor"],["Walt Disney World opens"],["Greenpeace founded"],["Decimalisation in UK"],["Bangladesh Liberation War"]],
+  1972: [["Munich Olympics massacre"],["Watergate scandal begins"],["Apollo 17: last Moon mission"],["Pocket calculator released"],["Pong arcade game released"]],
+  1973: [["Oil Crisis begins"],["Sydney Opera House opens"],["Roe v. Wade decision"],["Skylab space station launched"],["Pink Floyd releases Dark Side of the Moon"]],
+  1974: [["Nixon resigns over Watergate"],["Rubik's Cube invented"],["ABBA wins Eurovision"],["Terracotta Army discovered in China"],["India tests nuclear bomb"]],
+  1975: [["Vietnam War ends"],["Microsoft founded"],["Jaws creates the 'blockbuster'"],["Altair 8800 personal computer"],["Apollo-Soyuz joint space mission"]],
+  1976: [["Apple Computer founded"],["Viking 1 lands on Mars"],["Soweto Uprising in South Africa"],["Concorde starts commercial flights"],["US Bicentennial celebrations"]],
+  1977: [["Star Wars released"],["Voyager probes launched"],["Elvis Presley dies"],["Apple II computer released"],["Smallpox eradicated (last case)"]],
+  1978: [["First test-tube baby born"],["Camp David Peace Accords"],["Jonestown massacre"],["Superman film released"],["John Paul II becomes Pope"]],
+  1979: [["Iranian Revolution"],["Soviet invasion of Afghanistan"],["Three Mile Island nuclear accident"],["Margaret Thatcher becomes PM"],["Walkman released by Sony"]],
+  1980: [["John Lennon assassinated"],["Mount St. Helens erupts"],["CNN launches"],["Pac-Man released"],["Solidarity movement in Poland"]],
+  1981: [["First Space Shuttle launch"],["MTV launches"],["IBM PC released"],["AIDS first identified"],["Prince Charles & Diana marry"]],
+  1982: [["Falklands War"],["Michael Jackson's Thriller released"],["First CD player sold"],["E.T. the Extra-Terrestrial released"],["TIME Person of the Year: The Computer"]],
+  1983: [["Internet (TCP/IP) goes live"],["Star Wars defense program announced"],["Final MASH episode (106M viewers)"],["GPS made available for civilian use"],["Microsoft Word released"]],
+  1984: [["Apple Macintosh launched"],["Bhopal gas disaster"],["Band Aid — 'Do They Know It's Christmas?'"],["Tetris created"],["Indira Gandhi assassinated"]],
+  1985: [["Live Aid concerts"],["Titanic wreck discovered"],["Nintendo NES released in US"],["Windows 1.0 released"],["Gorbachev becomes Soviet leader"]],
+  1986: [["Chernobyl nuclear disaster"],["Space Shuttle Challenger explodes"],["Hands Across America"],["Oprah Winfrey Show goes national"],["Maradona's 'Hand of God' goal"]],
+  1987: [["Black Monday stock crash"],["First Simpsons short on TV"],["Montreal Protocol signed"],["DNA first used to convict a criminal"],["Reagan's 'Tear Down This Wall' speech"]],
+  1988: [["Pan Am Flight 103 Lockerbie bombing"],["Seoul Olympics"],["Stephen Hawking publishes A Brief History of Time"],["George H.W. Bush elected president"],["First Internet worm"]],
+  1989: [["Berlin Wall falls"],["Tiananmen Square protests"],["World Wide Web invented"],["Exxon Valdez oil spill"],["Game Boy released"]],
+  1990: [["Nelson Mandela released from prison"],["German Reunification"],["Hubble Space Telescope launched"],["Iraq invades Kuwait"],["The Simpsons TV series premieres"]],
+  1991: [["Soviet Union dissolves"],["Gulf War"],["World Wide Web goes public"],["Apartheid ends in South Africa"],["Super Nintendo released"]],
+  1992: [["Barcelona Olympics"],["EU established (Maastricht Treaty)"],["Los Angeles riots"],["First SMS text message sent"],["Bill Clinton elected president"]],
+  1993: [["World Trade Center bombing"],["Jurassic Park revolutionizes CGI"],["European Union officially begins"],["Oslo Peace Accords"],["Web browser Mosaic released"]],
+  1994: [["Nelson Mandela elected president"],["Rwandan Genocide"],["Channel Tunnel opens"],["Amazon.com founded"],["O.J. Simpson car chase"]],
+  1995: [["Oklahoma City bombing"],["eBay and Craigslist founded"],["Windows 95 released"],["Toy Story: first CGI feature film"],["O.J. Simpson acquitted"]],
+  1996: [["Dolly the Sheep cloned"],["Atlanta Olympics bombing"],["DVD format launched"],["Pokémon released in Japan"],["Deep Blue beats Kasparov (game 1)"]],
+  1997: [["Princess Diana dies"],["Hong Kong returned to China"],["Kyoto Protocol signed"],["Harry Potter published"],["Deep Blue beats Kasparov (match)"]],
+  1998: [["Google founded"],["International Space Station begins"],["Good Friday Agreement (Ireland)"],["Clinton-Lewinsky scandal"],["France wins FIFA World Cup"]],
+  1999: [["Euro currency introduced"],["Y2K panic"],["Columbine school shooting"],["Napster launches"],["The Matrix released"]],
+  2000: [["Y2K bug turns out fine"],["Dot-com bubble bursts"],["Human genome first draft completed"],["Putin becomes Russian president"],["PlayStation 2 released"]],
+  2001: [["9/11 attacks"],["Wikipedia launched"],["iPod released"],["War in Afghanistan begins"],["First Harry Potter film released"]],
+  2002: [["Euro coins & notes enter circulation"],["Bali bombings"],["Department of Homeland Security created"],["Spider-Man film breaks box office"],["Mars Odyssey finds water ice"]],
+  2003: [["Iraq War begins"],["Space Shuttle Columbia disaster"],["Human Genome Project completed"],["SARS outbreak"],["MySpace launched"]],
+  2004: [["Facebook launched"],["Indian Ocean tsunami"],["Mars rovers Spirit & Opportunity land"],["Athens Olympics"],["EU expands to 25 nations"]],
+  2005: [["Hurricane Katrina"],["YouTube launched"],["London 7/7 bombings"],["Kyoto Protocol takes effect"],["Angela Merkel becomes German Chancellor"]],
+  2006: [["Twitter launched"],["Pluto demoted from planet status"],["Saddam Hussein executed"],["Nintendo Wii released"],["Google buys YouTube"]],
+  2007: [["iPhone released"],["Global financial crisis begins"],["Virginia Tech shooting"],["Harry Potter final book released"],["Al Gore wins Nobel Peace Prize"]],
+  2008: [["Barack Obama elected president"],["Global financial crash (Lehman Brothers)"],["Beijing Olympics"],["Large Hadron Collider activated"],["Spotify launched"]],
+  2009: [["Michael Jackson dies"],["H1N1 swine flu pandemic"],["Obama inaugurated"],["Bitcoin created"],["Avatar released (highest grossing film)"]],
+  2010: [["Haiti earthquake"],["Deepwater Horizon oil spill"],["Instagram launched"],["Arab Spring begins"],["iPad released"]],
+  2011: [["Osama bin Laden killed"],["Fukushima nuclear disaster"],["Arab Spring continues"],["Royal Wedding (William & Kate)"],["Steve Jobs dies"]],
+  2012: [["Felix Baumgartner's space jump"],["London Olympics"],["Curiosity rover lands on Mars"],["Gangnam Style goes viral"],["Sandy Hook shooting"]],
+  2013: [["Edward Snowden leaks NSA data"],["Pope Francis elected"],["Boston Marathon bombing"],["Nelson Mandela dies"],["Typhoon Haiyan"]],
+  2014: [["Ice Bucket Challenge goes viral"],["Russia annexes Crimea"],["Ebola outbreak in West Africa"],["Scottish independence referendum"],["Rosetta lands probe on a comet"]],
+  2015: [["Paris terror attacks"],["Paris Climate Agreement"],["Refugee crisis in Europe"],["Same-sex marriage legalized in US"],["New Horizons reaches Pluto"]],
+  2016: [["Brexit referendum"],["Donald Trump elected president"],["Pokémon Go craze"],["Leonardo DiCaprio wins first Oscar"],["David Bowie and Prince die"]],
+  2017: [["#MeToo movement goes viral"],["Total solar eclipse across US"],["Hurricane Harvey & Irma"],["Trump inaugurated"],["Bitcoin reaches $20,000"]],
+  2018: [["Thai cave rescue"],["Royal Wedding (Harry & Meghan)"],["GDPR takes effect in Europe"],["Jamal Khashoggi killed"],["Stephen Hawking dies"]],
+  2019: [["Notre-Dame cathedral fire"],["First photo of a black hole"],["Hong Kong protests"],["Greta Thunberg's UN speech"],["Avengers: Endgame breaks records"]],
+  2020: [["COVID-19 pandemic begins"],["George Floyd protests / BLM"],["Beirut explosion"],["Australian bushfires"],["US presidential election (Biden wins)"]],
+  2021: [["US Capitol storming"],["COVID vaccines rolled out worldwide"],["Suez Canal blocked by Ever Given"],["Taliban retake Afghanistan"],["James Webb Space Telescope launched"]],
+  2022: [["Russia invades Ukraine"],["Queen Elizabeth II dies"],["James Webb Telescope first images"],["Elon Musk buys Twitter"],["FIFA World Cup in Qatar"]],
+  2023: [["ChatGPT sparks AI revolution"],["Turkey-Syria earthquake"],["Titan submersible disaster"],["Hamas-Israel conflict escalates"],["Threads launched by Meta"]],
+  2024: [["Trump assassination attempt"],["Paris Olympics"],["CrowdStrike global IT outage"],["Francis Scott Key Bridge collapse"],["Kate Middleton cancer diagnosis"]],
+  2025: [["LA wildfires"],["Trump inaugurated for second term"],["DeepSeek AI shakes markets"],["Panama Canal dispute"],["TikTok ban & reversal in US"]],
+};
+
 let currentType = 'song';
 let selectedItem = null;
 let debounceTimer = null;
@@ -449,9 +539,9 @@ const i18n = {
     btnRandom: 'Zuefällig',
     searchPlaceholder: (t) => `Tippe zum ${t} sueche...`,
     searchLabel: (t) => `Such en ${t}`,
-    typeLabels: { song: 'Song', movie: 'Film', mundart: 'Mundart-Song' },
-    typePlurals: { song: 'Songs', movie: 'Filme', mundart: 'Mundart-Songs' },
-    typeBtns: { song: 'Songs', movie: 'Filme', mundart: 'Mundart' },
+    typeLabels: { song: 'Song', movie: 'Film', mundart: 'Mundart-Song', event: 'Ereignis' },
+    typePlurals: { song: 'Songs', movie: 'Filme', mundart: 'Mundart-Songs', event: 'Ereignisse' },
+    typeBtns: { song: 'Songs', movie: 'Filme', mundart: 'Mundart', event: 'Ereignisse' },
     noResults: 'Kei Ergebnis gfunde',
     searching: 'Am sueche...',
     searchFailed: 'Suech fehlgschlage. Probier nomal.',
@@ -472,9 +562,9 @@ const i18n = {
     btnRandom: 'Random',
     searchPlaceholder: (t) => `Type to search ${t}...`,
     searchLabel: (t) => `Search for a ${t}`,
-    typeLabels: { song: 'song', movie: 'movie', mundart: 'Mundart song' },
-    typePlurals: { song: 'songs', movie: 'movies', mundart: 'Mundart songs' },
-    typeBtns: { song: 'Songs', movie: 'Movies', mundart: 'Mundart' },
+    typeLabels: { song: 'song', movie: 'movie', mundart: 'Mundart song', event: 'event' },
+    typePlurals: { song: 'songs', movie: 'movies', mundart: 'Mundart songs', event: 'events' },
+    typeBtns: { song: 'Songs', movie: 'Movies', mundart: 'Mundart', event: 'Events' },
     noResults: 'No results found',
     searching: 'Searching...',
     searchFailed: 'Search failed. Try again.',
@@ -508,7 +598,7 @@ function applyLang() {
   document.getElementById('labelSearch').innerHTML = `${s.searchLabel('<span id="typeLabel">' + s.typeLabels[currentType] + '</span>')}`;
   searchInput.placeholder = s.searchPlaceholder(s.typePlurals[currentType]);
   const btns = document.querySelectorAll('#typeToggle button');
-  const types = ['song', 'movie', 'mundart'];
+  const types = ['song', 'movie', 'mundart', 'event'];
   btns.forEach((btn, i) => { btn.textContent = s.typeBtns[types[i]]; });
 }
 
@@ -540,6 +630,19 @@ function selectItem(item) {
 }
 
 async function searchItems(query) {
+  if (currentType === 'event') {
+    const q = query.toLowerCase();
+    const results = [];
+    for (const [year, events] of Object.entries(knownEvents)) {
+      for (const ev of events) {
+        if (ev[0].toLowerCase().includes(q)) {
+          results.push({ name: ev[0], artist: '', year: parseInt(year), artwork: '' });
+        }
+      }
+    }
+    results.sort((a, b) => b.year - a.year);
+    return results.slice(0, 15);
+  }
   if (currentType === 'song' || currentType === 'mundart') {
     const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=15`;
     const resp = await fetch(url);
@@ -627,6 +730,7 @@ searchInput.addEventListener('focus', () => {
 function getEquivList() {
   if (currentType === 'mundart') return knownMundart;
   if (currentType === 'movie') return knownMovies;
+  if (currentType === 'event') return knownEvents;
   return knownSongs;
 }
 
@@ -652,11 +756,15 @@ function findEquivalent(year, genre) {
     }
   }
   const pick = list[Math.floor(Math.random() * list.length)];
-  return { name: pick[0], artist: pick[1] || '', year: targetYear, genre: (currentType === 'movie' ? pick[1] : '') || '' };
+  const artist = currentType === 'event' ? '' : (pick[1] || '');
+  return { name: pick[0], artist, year: targetYear, genre: (currentType === 'movie' ? pick[1] : '') || '' };
 }
 
 async function fetchMediaData(name, artist, type) {
   try {
+    if (type === 'event') {
+      return { artwork: '', wikiUrl: `https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(name)}` };
+    }
     if (type === 'song' || type === 'mundart') {
       const q = artist ? `${name} ${artist}` : name;
       const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&entity=song&limit=1`;
@@ -749,6 +857,9 @@ async function calculate() {
   if (picked.imdbId) {
     pickedActions.innerHTML = `<a href="https://www.imdb.com/title/${picked.imdbId}/" target="_blank" rel="noopener">IMDb &#8599;</a>`;
   }
+  if (currentType === 'event') {
+    pickedActions.innerHTML = `<a href="https://en.wikipedia.org/wiki/Special:Search?search=${encodeURIComponent(picked.name)}" target="_blank" rel="noopener">Wikipedia &#8599;</a>`;
+  }
 
   // Equivalent card
   document.getElementById('equivArt').style.display = 'none';
@@ -774,6 +885,9 @@ async function calculate() {
   }
   if (equivData.imdbId) {
     document.getElementById('equivActions').innerHTML = `<a href="https://www.imdb.com/title/${equivData.imdbId}/" target="_blank" rel="noopener">IMDb &#8599;</a>`;
+  }
+  if (equivData.wikiUrl) {
+    document.getElementById('equivActions').innerHTML = `<a href="${equivData.wikiUrl}" target="_blank" rel="noopener">Wikipedia &#8599;</a>`;
   }
 }
 </script>
