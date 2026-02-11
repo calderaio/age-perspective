@@ -127,7 +127,10 @@
   </div>
   <div id="selectedPill" style="display:none"></div>
 
-  <button onclick="calculate()">Zeig mir d'Perspektive</button>
+  <div style="display:flex;gap:8px;">
+    <button onclick="calculate()" style="flex:3">Zeig mir d'Perspektive</button>
+    <button onclick="pickRandom()" style="flex:1;background:#1f3060;border:1px solid #333;font-size:0.85rem;">Zuefällig</button>
+  </div>
 
   <div id="result">
     <h2 id="resultIntro"></h2>
@@ -554,6 +557,27 @@ async function fetchArtwork(name, artist, type) {
     }
   } catch (e) {}
   return '';
+}
+
+function pickRandom() {
+  const list = getEquivList();
+  const years = Object.keys(list).map(Number).filter(y => y >= 1980);
+  const year = years[Math.floor(Math.random() * years.length)];
+  const items = list[year];
+  const pick = items[Math.floor(Math.random() * items.length)];
+  selectItem({ name: pick[0], artist: pick[1] || '', year, artwork: '' });
+  // Try to fetch artwork
+  fetchArtwork(pick[0], pick[1] || '', currentType).then(art => {
+    if (art) {
+      selectedItem.artwork = art;
+      const img = selectedPill.querySelector('img');
+      if (img) { img.src = art; } else {
+        const newImg = document.createElement('img');
+        newImg.src = art;
+        selectedPill.insertBefore(newImg, selectedPill.firstChild);
+      }
+    }
+  });
 }
 
 async function calculate() {
