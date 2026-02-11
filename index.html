@@ -527,6 +527,14 @@ const searchInput = document.getElementById('searchInput');
 const dropdown = document.getElementById('dropdown');
 const selectedPill = document.getElementById('selectedPill');
 
+// Restore saved birth years
+const savedParent = localStorage.getItem('parentYear');
+const savedChild = localStorage.getItem('childYear');
+if (savedParent) document.getElementById('parentYear').value = savedParent;
+if (savedChild) document.getElementById('childYear').value = savedChild;
+document.getElementById('parentYear').addEventListener('input', e => localStorage.setItem('parentYear', e.target.value));
+document.getElementById('childYear').addEventListener('input', e => localStorage.setItem('childYear', e.target.value));
+
 const i18n = {
   de: {
     title: 'Altersperspektive',
