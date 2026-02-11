@@ -100,27 +100,30 @@
 </head>
 <body>
 <div class="container">
-  <h1>Altersperspektive</h1>
-  <p class="subtitle">De "neui" Song? So fühlt sich das für dis Chind aa.</p>
+  <div style="text-align:right;margin-bottom:8px;">
+    <button onclick="toggleLang()" id="langBtn" style="width:auto;padding:6px 14px;font-size:0.8rem;background:#1f3060;border:1px solid #333;">EN / DE</button>
+  </div>
+  <h1 id="title">Altersperspektive</h1>
+  <p class="subtitle" id="subtitle">De "neui" Song? So fühlt sich das für dis Chind aa.</p>
 
   <div class="row">
     <div>
-      <label>Dis Geburtsjahr</label>
+      <label id="labelParent">Dis Geburtsjahr</label>
       <input type="number" id="parentYear" placeholder="z.B. 1985" min="1900" max="2020">
     </div>
     <div>
-      <label>Geburtsjahr vom Chind</label>
+      <label id="labelChild">Geburtsjahr vom Chind</label>
       <input type="number" id="childYear" placeholder="z.B. 2015" min="1920" max="2026">
     </div>
   </div>
 
-  <div class="type-toggle">
+  <div class="type-toggle" id="typeToggle">
     <button class="active" onclick="setType('song')">Songs</button>
     <button onclick="setType('movie')">Filme</button>
     <button onclick="setType('mundart')">Mundart</button>
   </div>
 
-  <label>Such en <span id="typeLabel">Song</span></label>
+  <label id="labelSearch">Such en <span id="typeLabel">Song</span></label>
   <div class="search-wrap">
     <input type="text" id="searchInput" placeholder="Tippe zum Sueche..." autocomplete="off">
     <div class="dropdown" id="dropdown"></div>
@@ -128,8 +131,8 @@
   <div id="selectedPill" style="display:none"></div>
 
   <div style="display:flex;gap:8px;">
-    <button onclick="calculate()" style="flex:3">Zeig mir d'Perspektive</button>
-    <button onclick="pickRandom()" style="flex:1;background:#1f3060;border:1px solid #333;font-size:0.85rem;">Zuefällig</button>
+    <button onclick="calculate()" style="flex:3" id="btnCalc">Zeig mir d'Perspektive</button>
+    <button onclick="pickRandom()" style="flex:1;background:#1f3060;border:1px solid #333;font-size:0.85rem;" id="btnRandom">Zuefällig</button>
   </div>
 
   <div id="result">
@@ -414,15 +417,86 @@ const searchInput = document.getElementById('searchInput');
 const dropdown = document.getElementById('dropdown');
 const selectedPill = document.getElementById('selectedPill');
 
-const typeLabels = { song: 'Song', movie: 'Film', mundart: 'Mundart-Song' };
-const typePlurals = { song: 'Songs', movie: 'Filme', mundart: 'Mundart-Songs' };
+const i18n = {
+  de: {
+    title: 'Altersperspektive',
+    subtitle: 'De "neui" Song? So fühlt sich das für dis Chind aa.',
+    labelParent: 'Dis Geburtsjahr',
+    labelChild: 'Geburtsjahr vom Chind',
+    placeholderParent: 'z.B. 1985',
+    placeholderChild: 'z.B. 2015',
+    btnCalc: "Zeig mir d'Perspektive",
+    btnRandom: 'Zuefällig',
+    searchPlaceholder: (t) => `Tippe zum ${t} sueche...`,
+    searchLabel: (t) => `Such en ${t}`,
+    typeLabels: { song: 'Song', movie: 'Film', mundart: 'Mundart-Song' },
+    typePlurals: { song: 'Songs', movie: 'Filme', mundart: 'Mundart-Songs' },
+    typeBtns: { song: 'Songs', movie: 'Filme', mundart: 'Mundart' },
+    noResults: 'Kei Ergebnis gfunde',
+    searching: 'Am sueche...',
+    searchFailed: 'Suech fehlgschlage. Probier nomal.',
+    alertFill: 'Bitte füll alli Fälder us!',
+    resultIntro: (tl, picked, equiv) => `Für dis Chind fühlt sich de ${tl} "${picked}" aa wie für dich de ${tl} "${equiv}".`,
+    explanation: (picked, pickedYear, ageDiff, childYear, equiv, equivYear, parentYear, equivAge) =>
+      `<strong>"${picked}"</strong> (${pickedYear}) isch <strong>${ageDiff} Jahr alt</strong> für dis Chind (Jahrgang ${childYear}).<br><br>` +
+      `Das isch wie <strong>"${equiv}"</strong> (${equivYear}) für dich gsi isch, wo du ${parentYear} uf d'Wält cho bisch &mdash; au öppe <strong>${equivAge} Jahr alt</strong>.`,
+  },
+  en: {
+    title: 'Age Perspective',
+    subtitle: 'That "recent" song? Here\'s what it feels like to your kid.',
+    labelParent: 'Your year of birth',
+    labelChild: "Child's year of birth",
+    placeholderParent: 'e.g. 1985',
+    placeholderChild: 'e.g. 2015',
+    btnCalc: 'Show me the perspective',
+    btnRandom: 'Random',
+    searchPlaceholder: (t) => `Type to search ${t}...`,
+    searchLabel: (t) => `Search for a ${t}`,
+    typeLabels: { song: 'song', movie: 'movie', mundart: 'Mundart song' },
+    typePlurals: { song: 'songs', movie: 'movies', mundart: 'Mundart songs' },
+    typeBtns: { song: 'Songs', movie: 'Movies', mundart: 'Mundart' },
+    noResults: 'No results found',
+    searching: 'Searching...',
+    searchFailed: 'Search failed. Try again.',
+    alertFill: 'Please fill in all fields!',
+    resultIntro: (tl, picked, equiv) => `For your child, the ${tl} "${picked}" feels like the ${tl} "${equiv}" feels for you.`,
+    explanation: (picked, pickedYear, ageDiff, childYear, equiv, equivYear, parentYear, equivAge) =>
+      `<strong>"${picked}"</strong> (${pickedYear}) is <strong>${ageDiff} years old</strong> to your child (born ${childYear}).<br><br>` +
+      `That's like <strong>"${equiv}"</strong> (${equivYear}) was to you when you were born in ${parentYear} &mdash; also about <strong>${equivAge} years old</strong>.`,
+  }
+};
+
+let lang = 'de';
+function t() { return i18n[lang]; }
+
+function toggleLang() {
+  lang = lang === 'de' ? 'en' : 'de';
+  applyLang();
+}
+
+function applyLang() {
+  const s = t();
+  document.getElementById('title').textContent = s.title;
+  document.getElementById('subtitle').textContent = s.subtitle;
+  document.getElementById('labelParent').textContent = s.labelParent;
+  document.getElementById('labelChild').textContent = s.labelChild;
+  document.getElementById('parentYear').placeholder = s.placeholderParent;
+  document.getElementById('childYear').placeholder = s.placeholderChild;
+  document.getElementById('btnCalc').textContent = s.btnCalc;
+  document.getElementById('btnRandom').textContent = s.btnRandom;
+  document.getElementById('typeLabel').textContent = s.typeLabels[currentType];
+  document.getElementById('labelSearch').innerHTML = `${s.searchLabel('<span id="typeLabel">' + s.typeLabels[currentType] + '</span>')}`;
+  searchInput.placeholder = s.searchPlaceholder(s.typePlurals[currentType]);
+  const btns = document.querySelectorAll('#typeToggle button');
+  const types = ['song', 'movie', 'mundart'];
+  btns.forEach((btn, i) => { btn.textContent = s.typeBtns[types[i]]; });
+}
 
 function setType(type) {
   currentType = type;
-  document.getElementById('typeLabel').textContent = typeLabels[type];
-  document.querySelectorAll('.type-toggle button').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#typeToggle button').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
-  searchInput.placeholder = `Tippe zum ${typePlurals[type]} sueche...`;
+  applyLang();
   clearSelection();
 }
 
@@ -473,7 +547,7 @@ async function searchItems(query) {
 function renderResults(results) {
   dropdown.innerHTML = '';
   if (results.length === 0) {
-    dropdown.innerHTML = '<div class="loading">Kei Ergebnis gfunde</div>';
+    dropdown.innerHTML = `<div class="loading">${t().noResults}</div>`;
   } else {
     results.forEach(item => {
       const div = document.createElement('div');
@@ -498,14 +572,14 @@ searchInput.addEventListener('input', () => {
     dropdown.classList.remove('open');
     return;
   }
-  dropdown.innerHTML = '<div class="loading">Am sueche...</div>';
+  dropdown.innerHTML = `<div class="loading">${t().searching}</div>`;
   dropdown.classList.add('open');
   debounceTimer = setTimeout(async () => {
     try {
       const results = await searchItems(q);
       renderResults(results);
     } catch (e) {
-      dropdown.innerHTML = '<div class="loading">Suech fehlgschlage. Probier nomal.</div>';
+      dropdown.innerHTML = `<div class="loading">${t().searchFailed}</div>`;
     }
   }, 350);
 });
@@ -585,7 +659,7 @@ async function calculate() {
   const childYear = parseInt(document.getElementById('childYear').value);
 
   if (!parentYear || !childYear || !selectedItem) {
-    alert('Bitte füll alli Fälder us!');
+    alert(t().alertFill);
     return;
   }
 
@@ -599,9 +673,10 @@ async function calculate() {
   const res = document.getElementById('result');
   res.style.display = 'block';
 
-  const tl = typeLabels[currentType];
+  const s = t();
+  const tl = s.typeLabels[currentType];
   document.getElementById('resultIntro').textContent =
-    `Für dis Chind fühlt sich de ${tl} "${picked.name}" aa wie für dich de ${tl} "${equivalent.name}".`;
+    s.resultIntro(tl, picked.name, equivalent.name);
 
   // Picked card
   const pickedArtSrc = picked.artwork ? picked.artwork.replace('100x100', '300x300') : '';
@@ -618,8 +693,7 @@ async function calculate() {
   document.getElementById('equivYear').textContent = equivalent.year;
 
   document.getElementById('resultExplanation').innerHTML =
-    `<strong>"${picked.name}"</strong> (${pickedYear}) isch <strong>${ageDiff} Jahr alt</strong> für dis Chind (Jahrgang ${childYear}).<br><br>` +
-    `Das isch wie <strong>"${equivalent.name}"</strong> (${equivalent.year}) für dich gsi isch, wo du ${parentYear} uf d'Wält cho bisch &mdash; au öppe <strong>${Math.abs(parentYear - equivalent.year)} Jahr alt</strong>.`;
+    s.explanation(picked.name, pickedYear, ageDiff, childYear, equivalent.name, equivalent.year, parentYear, Math.abs(parentYear - equivalent.year));
 
   res.scrollIntoView({ behavior: 'smooth' });
 
