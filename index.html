@@ -492,8 +492,9 @@ async function calculate() {
   const res = document.getElementById('result');
   res.style.display = 'block';
 
+  const typeLabel = currentType === 'song' ? 'song' : 'movie';
   document.getElementById('resultIntro').textContent =
-    `For your child, "${picked.name}" feels like...`;
+    `For your child, the ${typeLabel} "${picked.name}" feels like the ${typeLabel} "${equivalent.name}" feels for you.`;
 
   // Picked card
   const pickedArtSrc = picked.artwork ? picked.artwork.replace('100x100', '300x300') : '';
