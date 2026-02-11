@@ -548,9 +548,20 @@ const i18n = {
     alertFill: 'Bitte füll alli Fälder us!',
     noEquiv: (tl, equivYear) => `Kei Verglich gfunde — s Jahr ${equivYear} isch z'wiit zrugg. Probier öppis Neuers!`,
     resultIntro: (tl, picked, equiv) => `Für dis Chind fühlt sich de ${tl} "${picked}" aa wie für dich de ${tl} "${equiv}".`,
-    explanation: (picked, pickedYear, ageDiff, childYear, equiv, equivYear, parentYear, equivAge) =>
-      `<strong>"${picked}"</strong> (${pickedYear}) isch <strong>${ageDiff} Jahr alt</strong> für dis Chind (Jahrgang ${childYear}).<br><br>` +
-      `Das isch wie <strong>"${equiv}"</strong> (${equivYear}) für dich gsi isch, wo du ${parentYear} uf d'Wält cho bisch &mdash; au öppe <strong>${equivAge} Jahr alt</strong>.`,
+    explanation: (picked, pickedYear, ageDiff, childYear, equiv, equivYear, parentYear, equivAge, type) => {
+      const age = type === 'event'
+        ? `isch <strong>vor ${ageDiff} Jahr passiert</strong>`
+        : type === 'movie'
+        ? `isch <strong>vor ${ageDiff} Jahr usecho</strong>`
+        : `isch <strong>${ageDiff} Jahr alt</strong>`;
+      const equivAge2 = type === 'event'
+        ? `au öppe <strong>vor ${equivAge} Jahr passiert</strong>`
+        : type === 'movie'
+        ? `au öppe <strong>vor ${equivAge} Jahr usecho</strong>`
+        : `au öppe <strong>${equivAge} Jahr alt</strong>`;
+      return `<strong>"${picked}"</strong> (${pickedYear}) ${age} für dis Chind (Jahrgang ${childYear}).<br><br>` +
+        `Das isch wie <strong>"${equiv}"</strong> (${equivYear}) für dich gsi isch, wo du ${parentYear} uf d'Wält cho bisch &mdash; ${equivAge2}.`;
+    },
   },
   en: {
     title: 'Age Perspective',
@@ -572,9 +583,20 @@ const i18n = {
     alertFill: 'Please fill in all fields!',
     noEquiv: (tl, equivYear) => `No comparison found — the year ${equivYear} is too far back. Try something more recent!`,
     resultIntro: (tl, picked, equiv) => `For your child, the ${tl} "${picked}" feels like the ${tl} "${equiv}" feels for you.`,
-    explanation: (picked, pickedYear, ageDiff, childYear, equiv, equivYear, parentYear, equivAge) =>
-      `<strong>"${picked}"</strong> (${pickedYear}) is <strong>${ageDiff} years old</strong> to your child (born ${childYear}).<br><br>` +
-      `That's like <strong>"${equiv}"</strong> (${equivYear}) was to you when you were born in ${parentYear} &mdash; also about <strong>${equivAge} years old</strong>.`,
+    explanation: (picked, pickedYear, ageDiff, childYear, equiv, equivYear, parentYear, equivAge, type) => {
+      const age = type === 'event'
+        ? `<strong>happened ${ageDiff} years ago</strong>`
+        : type === 'movie'
+        ? `<strong>was released ${ageDiff} years ago</strong>`
+        : `is <strong>${ageDiff} years old</strong>`;
+      const equivAge2 = type === 'event'
+        ? `also about <strong>${equivAge} years ago</strong>`
+        : type === 'movie'
+        ? `also released about <strong>${equivAge} years ago</strong>`
+        : `also about <strong>${equivAge} years old</strong>`;
+      return `<strong>"${picked}"</strong> (${pickedYear}) ${age} to your child (born ${childYear}).<br><br>` +
+        `That's like <strong>"${equiv}"</strong> (${equivYear}) was to you when you were born in ${parentYear} &mdash; ${equivAge2}.`;
+    },
   }
 };
 
@@ -882,7 +904,7 @@ async function calculate() {
   document.getElementById('equivPlayer').innerHTML = '';
 
   document.getElementById('resultExplanation').innerHTML =
-    s.explanation(picked.name, pickedYear, ageDiff, childYear, equivalent.name, equivalent.year, parentYear, Math.abs(parentYear - equivalent.year));
+    s.explanation(picked.name, pickedYear, ageDiff, childYear, equivalent.name, equivalent.year, parentYear, Math.abs(parentYear - equivalent.year), currentType);
 
   res.scrollIntoView({ behavior: 'smooth' });
 
