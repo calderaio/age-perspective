@@ -96,6 +96,16 @@
   .selected-pill .remove {
     cursor: pointer; color: #e94560; font-weight: 700; font-size: 1.1rem; margin-left: 4px;
   }
+  .card-actions { margin-top: 8px; }
+  .card-actions a, .card-actions button {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 12px; border-radius: 6px; font-size: 0.8rem; font-weight: 600;
+    text-decoration: none; cursor: pointer; border: 1px solid #333;
+    background: #1a1a2e; color: #e94560; transition: background 0.2s;
+  }
+  .card-actions a:hover, .card-actions button:hover { background: #1f3060; }
+  .preview-player { margin-top: 8px; }
+  .preview-player audio { width: 160px; height: 28px; }
 </style>
 </head>
 <body>
@@ -143,6 +153,8 @@
         <div class="card-title" id="pickedName"></div>
         <div class="card-artist" id="pickedArtist"></div>
         <div class="card-year" id="pickedYear"></div>
+        <div class="card-actions" id="pickedActions"></div>
+        <div class="preview-player" id="pickedPlayer"></div>
       </div>
       <div class="result-arrow">&rarr;</div>
       <div class="result-card equivalent">
@@ -150,6 +162,8 @@
         <div class="card-title" id="equivName"></div>
         <div class="card-artist" id="equivArtist"></div>
         <div class="card-year" id="equivYear"></div>
+        <div class="card-actions" id="equivActions"></div>
+        <div class="preview-player" id="equivPlayer"></div>
       </div>
     </div>
     <div class="explanation" id="resultExplanation"></div>
@@ -529,6 +543,7 @@ async function searchItems(query) {
       artist: r.artistName,
       year: new Date(r.releaseDate).getFullYear(),
       artwork: r.artworkUrl100 || r.artworkUrl60 || '',
+      previewUrl: r.previewUrl || '',
     }));
   } else {
     const url = `https://www.omdbapi.com/?s=${encodeURIComponent(query)}&type=movie&apikey=trilogy`;
@@ -540,6 +555,7 @@ async function searchItems(query) {
       artist: '',
       year: parseInt(r.Year) || 0,
       artwork: r.Poster !== 'N/A' ? r.Poster : '',
+      imdbId: r.imdbID || '',
     }));
   }
 }
@@ -613,7 +629,7 @@ function findEquivalent(year) {
   return { name: pick[0], artist: pick[1] || '', year: targetYear };
 }
 
-async function fetchArtwork(name, artist, type) {
+async function fetchMediaData(name, artist, type) {
   try {
     if (type === 'song' || type === 'mundart') {
       const q = artist ? `${name} ${artist}` : name;
@@ -621,16 +637,23 @@ async function fetchArtwork(name, artist, type) {
       const resp = await fetch(url);
       const data = await resp.json();
       if (data.results && data.results[0]) {
-        return (data.results[0].artworkUrl100 || '').replace('100x100', '300x300');
+        const r = data.results[0];
+        return {
+          artwork: (r.artworkUrl100 || '').replace('100x100', '300x300'),
+          previewUrl: r.previewUrl || '',
+        };
       }
     } else {
       const url = `https://www.omdbapi.com/?t=${encodeURIComponent(name)}&type=movie&apikey=trilogy`;
       const resp = await fetch(url);
       const data = await resp.json();
-      if (data.Poster && data.Poster !== 'N/A') return data.Poster;
+      return {
+        artwork: (data.Poster && data.Poster !== 'N/A') ? data.Poster : '',
+        imdbId: data.imdbID || '',
+      };
     }
   } catch (e) {}
-  return '';
+  return { artwork: '' };
 }
 
 function pickRandom() {
@@ -639,18 +662,19 @@ function pickRandom() {
   const year = years[Math.floor(Math.random() * years.length)];
   const items = list[year];
   const pick = items[Math.floor(Math.random() * items.length)];
-  selectItem({ name: pick[0], artist: pick[1] || '', year, artwork: '' });
-  // Try to fetch artwork
-  fetchArtwork(pick[0], pick[1] || '', currentType).then(art => {
-    if (art) {
-      selectedItem.artwork = art;
+  selectItem({ name: pick[0], artist: pick[1] || '', year, artwork: '', previewUrl: '' });
+  // Try to fetch artwork + preview
+  fetchMediaData(pick[0], pick[1] || '', currentType).then(data => {
+    if (data.artwork) {
+      selectedItem.artwork = data.artwork;
       const img = selectedPill.querySelector('img');
-      if (img) { img.src = art; } else {
+      if (img) { img.src = data.artwork; } else {
         const newImg = document.createElement('img');
-        newImg.src = art;
+        newImg.src = data.artwork;
         selectedPill.insertBefore(newImg, selectedPill.firstChild);
       }
     }
+    if (data.previewUrl) selectedItem.previewUrl = data.previewUrl;
   });
 }
 
@@ -686,22 +710,42 @@ async function calculate() {
   document.getElementById('pickedArtist').textContent = picked.artist || '';
   document.getElementById('pickedYear').textContent = pickedYear;
 
+  // Picked actions
+  const pickedActions = document.getElementById('pickedActions');
+  const pickedPlayer = document.getElementById('pickedPlayer');
+  pickedActions.innerHTML = '';
+  pickedPlayer.innerHTML = '';
+  if (picked.previewUrl) {
+    pickedPlayer.innerHTML = `<audio controls src="${picked.previewUrl}"></audio>`;
+  }
+  if (picked.imdbId) {
+    pickedActions.innerHTML = `<a href="https://www.imdb.com/title/${picked.imdbId}/" target="_blank" rel="noopener">IMDb &#8599;</a>`;
+  }
+
   // Equivalent card
   document.getElementById('equivArt').style.display = 'none';
   document.getElementById('equivName').textContent = equivalent.name;
   document.getElementById('equivArtist').textContent = equivalent.artist || '';
   document.getElementById('equivYear').textContent = equivalent.year;
+  document.getElementById('equivActions').innerHTML = '';
+  document.getElementById('equivPlayer').innerHTML = '';
 
   document.getElementById('resultExplanation').innerHTML =
     s.explanation(picked.name, pickedYear, ageDiff, childYear, equivalent.name, equivalent.year, parentYear, Math.abs(parentYear - equivalent.year));
 
   res.scrollIntoView({ behavior: 'smooth' });
 
-  // Fetch equivalent artwork in background
-  const equivArt = await fetchArtwork(equivalent.name, equivalent.artist, currentType);
-  if (equivArt) {
-    document.getElementById('equivArt').src = equivArt;
+  // Fetch equivalent media data in background
+  const equivData = await fetchMediaData(equivalent.name, equivalent.artist, currentType);
+  if (equivData.artwork) {
+    document.getElementById('equivArt').src = equivData.artwork;
     document.getElementById('equivArt').style.display = '';
+  }
+  if (equivData.previewUrl) {
+    document.getElementById('equivPlayer').innerHTML = `<audio controls src="${equivData.previewUrl}"></audio>`;
+  }
+  if (equivData.imdbId) {
+    document.getElementById('equivActions').innerHTML = `<a href="https://www.imdb.com/title/${equivData.imdbId}/" target="_blank" rel="noopener">IMDb &#8599;</a>`;
   }
 }
 </script>
