@@ -546,6 +546,7 @@ const i18n = {
     searching: 'Am sueche...',
     searchFailed: 'Suech fehlgschlage. Probier nomal.',
     alertFill: 'Bitte füll alli Fälder us!',
+    noEquiv: (tl, equivYear) => `Kei Verglich gfunde — s Jahr ${equivYear} isch z'wiit zrugg. Probier öppis Neuers!`,
     resultIntro: (tl, picked, equiv) => `Für dis Chind fühlt sich de ${tl} "${picked}" aa wie für dich de ${tl} "${equiv}".`,
     explanation: (picked, pickedYear, ageDiff, childYear, equiv, equivYear, parentYear, equivAge) =>
       `<strong>"${picked}"</strong> (${pickedYear}) isch <strong>${ageDiff} Jahr alt</strong> für dis Chind (Jahrgang ${childYear}).<br><br>` +
@@ -569,6 +570,7 @@ const i18n = {
     searching: 'Searching...',
     searchFailed: 'Search failed. Try again.',
     alertFill: 'Please fill in all fields!',
+    noEquiv: (tl, equivYear) => `No comparison found — the year ${equivYear} is too far back. Try something more recent!`,
     resultIntro: (tl, picked, equiv) => `For your child, the ${tl} "${picked}" feels like the ${tl} "${equiv}" feels for you.`,
     explanation: (picked, pickedYear, ageDiff, childYear, equiv, equivYear, parentYear, equivAge) =>
       `<strong>"${picked}"</strong> (${pickedYear}) is <strong>${ageDiff} years old</strong> to your child (born ${childYear}).<br><br>` +
@@ -743,6 +745,7 @@ function findEquivalent(year, genre) {
       const diff = Math.abs(parseInt(y) - year);
       if (diff < bestDiff) { bestDiff = diff; best = parseInt(y); }
     }
+    if (best === null || Math.abs(best - year) > 5) return null;
     targetYear = best;
   }
   const list = known[targetYear];
@@ -834,6 +837,15 @@ async function calculate() {
 
   const s = t();
   const tl = s.typeLabels[currentType];
+
+  if (!equivalent) {
+    document.getElementById('resultIntro').textContent = s.noEquiv(tl, equivalentYear);
+    document.querySelector('.result-comparison').style.display = 'none';
+    document.getElementById('resultExplanation').innerHTML = '';
+    res.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+  document.querySelector('.result-comparison').style.display = '';
   document.getElementById('resultIntro').textContent =
     s.resultIntro(tl, picked.name, equivalent.name);
 
