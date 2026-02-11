@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Age Perspective</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #1a1a2e;
+    color: #eee;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 40px 16px;
+  }
+  .container { max-width: 600px; width: 100%; }
+  h1 { text-align: center; margin-bottom: 8px; font-size: 1.8rem; }
+  .subtitle { text-align: center; color: #aaa; margin-bottom: 32px; font-size: 0.95rem; }
+  label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.9rem; }
+  input {
+    width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #333;
+    background: #16213e; color: #eee; font-size: 1rem; margin-bottom: 20px;
+  }
+  input:focus { outline: none; border-color: #e94560; }
+  .row { display: flex; gap: 16px; }
+  .row > div { flex: 1; }
+  button {
+    width: 100%; padding: 12px; border: none; border-radius: 8px;
+    background: #e94560; color: #fff; font-size: 1.05rem; font-weight: 600;
+    cursor: pointer; transition: background 0.2s;
+  }
+  button:hover { background: #c73650; }
+  #result {
+    margin-top: 32px; padding: 24px; border-radius: 12px;
+    background: #16213e; display: none; text-align: center;
+  }
+  #result h2 { font-size: 1.1rem; color: #aaa; margin-bottom: 12px; }
+  .result-comparison {
+    display: flex; gap: 20px; justify-content: center; align-items: flex-start;
+    margin-top: 16px; flex-wrap: wrap;
+  }
+  .result-card {
+    flex: 1; min-width: 180px; max-width: 220px; text-align: center;
+  }
+  .result-card img {
+    width: 140px; height: 140px; object-fit: cover; border-radius: 8px;
+    margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+  .result-card .card-title { font-size: 1.05rem; font-weight: 700; }
+  .result-card .card-artist { font-size: 0.9rem; color: #aaa; margin-top: 2px; }
+  .result-card .card-year { font-size: 0.85rem; color: #e94560; margin-top: 4px; }
+  .result-card.picked .card-title { color: #ccc; }
+  .result-card.equivalent .card-title { color: #e94560; }
+  .result-arrow { font-size: 2rem; color: #555; align-self: center; padding-top: 40px; }
+  #result .explanation {
+    margin-top: 20px; padding: 16px; background: #1a1a2e; border-radius: 8px;
+    font-size: 0.9rem; color: #aaa; line-height: 1.6;
+  }
+  #result .explanation strong { color: #eee; }
+  .type-toggle { display: flex; gap: 8px; margin-bottom: 20px; }
+  .type-toggle button {
+    flex: 1; padding: 8px; font-size: 0.9rem; background: #16213e; border: 1px solid #333;
+  }
+  .type-toggle button.active { background: #e94560; border-color: #e94560; }
+  .type-toggle button:hover:not(.active) { background: #1f3060; }
+  .search-wrap { position: relative; margin-bottom: 20px; }
+  .search-wrap input { margin-bottom: 0; }
+  .dropdown {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 10;
+    background: #16213e; border: 1px solid #333; border-top: none;
+    border-radius: 0 0 8px 8px; max-height: 260px; overflow-y: auto;
+    display: none;
+  }
+  .dropdown.open { display: block; }
+  .dropdown .item {
+    padding: 10px 12px; cursor: pointer; font-size: 0.95rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .dropdown .item:hover { background: #1f3060; }
+  .dropdown .item img {
+    width: 40px; height: 40px; border-radius: 4px; object-fit: cover; flex-shrink: 0;
+  }
+  .dropdown .item .info { flex: 1; min-width: 0; }
+  .dropdown .item .title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dropdown .item .meta { font-size: 0.8rem; color: #aaa; }
+  .dropdown .item .year-tag { color: #e94560; font-size: 0.8rem; }
+  .dropdown .loading { padding: 12px; color: #aaa; text-align: center; font-size: 0.9rem; }
+  .selected-pill {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #1f3060; border: 1px solid #e94560; border-radius: 8px;
+    padding: 8px 14px; margin-bottom: 20px; font-size: 0.95rem;
+  }
+  .selected-pill img { width: 36px; height: 36px; border-radius: 4px; object-fit: cover; }
+  .selected-pill .remove {
+    cursor: pointer; color: #e94560; font-weight: 700; font-size: 1.1rem; margin-left: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Age Perspective</h1>
+  <p class="subtitle">That "recent" song? Here's what it feels like to your kid.</p>
+
+  <div class="row">
+    <div>
+      <label>Your year of birth</label>
+      <input type="number" id="parentYear" placeholder="e.g. 1985" min="1900" max="2020">
+    </div>
+    <div>
+      <label>Child's year of birth</label>
+      <input type="number" id="childYear" placeholder="e.g. 2015" min="1920" max="2026">
+    </div>
+  </div>
+
+  <div class="type-toggle">
+    <button class="active" onclick="setType('song')">Songs</button>
+    <button onclick="setType('movie')">Movies</button>
+  </div>
+
+  <label>Search for a <span id="typeLabel">song</span></label>
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="Type to search songs..." autocomplete="off">
+    <div class="dropdown" id="dropdown"></div>
+  </div>
+  <div id="selectedPill" style="display:none"></div>
+
+  <button onclick="calculate()">Show me the perspective</button>
+
+  <div id="result">
+    <h2 id="resultIntro"></h2>
+    <div class="result-comparison">
+      <div class="result-card picked">
+        <img id="pickedArt" src="" alt="">
+        <div class="card-title" id="pickedName"></div>
+        <div class="card-artist" id="pickedArtist"></div>
+        <div class="card-year" id="pickedYear"></div>
+      </div>
+      <div class="result-arrow">→</div>
+      <div class="result-card equivalent">
+        <img id="equivArt" src="" alt="">
+        <div class="card-title" id="equivName"></div>
+        <div class="card-artist" id="equivArtist"></div>
+        <div class="card-year" id="equivYear"></div>
+      </div>
+    </div>
+    <div class="explanation" id="resultExplanation"></div>
+  </div>
+</div>
+
+<script>
+// Curated lists: 5 songs and 5 movies per year (randomly picked for the equivalent)
+const knownSongs = {
+  1940: [["In the Mood","Glenn Miller"],["When You Wish Upon a Star","Cliff Edwards"],["Fools Rush In","Glenn Miller"],["Imagination","Glenn Miller"],["Tuxedo Junction","Glenn Miller"]],
+  1941: [["Chattanooga Choo Choo","Glenn Miller"],["Boogie Woogie Bugle Boy","The Andrews Sisters"],["I Don't Want to Set the World on Fire","The Ink Spots"],["Blues in the Night","Woody Herman"],["Amapola","Jimmy Dorsey"]],
+  1942: [["White Christmas","Bing Crosby"],["Moonlight Cocktail","Glenn Miller"],["Tangerine","Jimmy Dorsey"],["Jingle Jangle Jingle","Kay Kyser"],["Don't Sit Under the Apple Tree","The Andrews Sisters"]],
+  1943: [["As Time Goes By","Dooley Wilson"],["You'll Never Know","Alice Faye"],["Paper Doll","The Mills Brothers"],["That Old Black Magic","Glenn Miller"],["I've Heard That Song Before","Harry James"]],
+  1944: [["Swinging on a Star","Bing Crosby"],["I'll Be Seeing You","Bing Crosby"],["Sentimental Journey","Doris Day"],["Don't Fence Me In","Bing Crosby"],["Ac-Cent-Tchu-Ate the Positive","Johnny Mercer"]],
+  1945: [["Sentimental Journey","Les Brown"],["Rum and Coca-Cola","The Andrews Sisters"],["Dream","The Pied Pipers"],["My Dreams Are Getting Better","Les Brown"],["On the Atchison, Topeka and the Santa Fe","Johnny Mercer"]],
+  1946: [["The Christmas Song","Nat King Cole"],["To Each His Own","The Ink Spots"],["Prisoner of Love","Perry Como"],["Five Minutes More","Frank Sinatra"],["The Gypsy","The Ink Spots"]],
+  1947: [["Near You","Francis Craig"],["Peg o' My Heart","The Harmonicats"],["Heartaches","Ted Weems"],["Ballerina","Vaughn Monroe"],["Open the Door, Richard!","Dusty Fletcher"]],
+  1948: [["It's Magic","Doris Day"],["Twelfth Street Rag","Pee Wee Hunt"],["Nature Boy","Nat King Cole"],["Manana","Peggy Lee"],["You Can't Be True, Dear","Ken Griffin"]],
+  1949: [["Some Enchanted Evening","Perry Como"],["Riders in the Sky","Vaughn Monroe"],["Cruising Down the River","Russ Morgan"],["That Lucky Old Sun","Frankie Laine"],["A Dream Is a Wish Your Heart Makes","Ilene Woods"]],
+  1950: [["Frosty the Snowman","Gene Autry"],["Goodnight Irene","The Weavers"],["Mona Lisa","Nat King Cole"],["Tennessee Waltz","Patti Page"],["If I Knew You Were Comin'","Eileen Barton"]],
+  1951: [["Too Young","Nat King Cole"],["Because of You","Tony Bennett"],["Cold, Cold Heart","Tony Bennett"],["Cry","Johnnie Ray"],["On Top of Old Smoky","The Weavers"]],
+  1952: [["You Belong to Me","Jo Stafford"],["Wheel of Fortune","Kay Starr"],["Blue Tango","Leroy Anderson"],["Here in My Heart","Al Martino"],["Auf Wiedersehn, Sweetheart","Vera Lynn"]],
+  1953: [["That's Amore","Dean Martin"],["Vaya con Dios","Les Paul & Mary Ford"],["Song from Moulin Rouge","Percy Faith"],["Doggie in the Window","Patti Page"],["You, You, You","The Ames Brothers"]],
+  1954: [["Sh-Boom","The Crew-Cuts"],["Wanted","Perry Como"],["Little Things Mean a Lot","Kitty Kallen"],["Hey There","Rosemary Clooney"],["Three Coins in the Fountain","The Four Aces"]],
+  1955: [["Rock Around the Clock","Bill Haley"],["Sixteen Tons","Tennessee Ernie Ford"],["Unchained Melody","Al Hibbler"],["The Yellow Rose of Texas","Mitch Miller"],["Ain't That a Shame","Fats Domino"]],
+  1956: [["Hound Dog","Elvis Presley"],["Heartbreak Hotel","Elvis Presley"],["Don't Be Cruel","Elvis Presley"],["My Prayer","The Platters"],["The Great Pretender","The Platters"]],
+  1957: [["Jailhouse Rock","Elvis Presley"],["All Shook Up","Elvis Presley"],["That'll Be the Day","Buddy Holly"],["Whole Lotta Shakin' Goin' On","Jerry Lee Lewis"],["Bye Bye Love","Everly Brothers"]],
+  1958: [["Johnny B. Goode","Chuck Berry"],["All I Have to Do Is Dream","Everly Brothers"],["Tequila","The Champs"],["Volare","Domenico Modugno"],["It's All in the Game","Tommy Edwards"]],
+  1959: [["Put Your Head on My Shoulder","Paul Anka"],["Mack the Knife","Bobby Darin"],["Venus","Frankie Avalon"],["What'd I Say","Ray Charles"],["A Big Hunk o' Love","Elvis Presley"]],
+  1960: [["The Twist","Chubby Checker"],["It's Now or Never","Elvis Presley"],["Are You Lonesome Tonight?","Elvis Presley"],["Save the Last Dance for Me","The Drifters"],["Cathy's Clown","Everly Brothers"]],
+  1961: [["Stand by Me","Ben E. King"],["Runaway","Del Shannon"],["Blue Moon","The Marcels"],["Take Good Care of My Baby","Bobby Vee"],["Hit the Road Jack","Ray Charles"]],
+  1962: [["I Can't Stop Loving You","Ray Charles"],["The Loco-Motion","Little Eva"],["Sherry","The Four Seasons"],["Big Girls Don't Cry","The Four Seasons"],["Breaking Up Is Hard to Do","Neil Sedaka"]],
+  1963: [["Surfin' USA","The Beach Boys"],["He's So Fine","The Chiffons"],["My Boyfriend's Back","The Angels"],["Louie Louie","The Kingsmen"],["Be My Baby","The Ronettes"]],
+  1964: [["I Want to Hold Your Hand","The Beatles"],["She Loves You","The Beatles"],["Oh, Pretty Woman","Roy Orbison"],["My Girl","The Temptations"],["Baby Love","The Supremes"]],
+  1965: [["Satisfaction","The Rolling Stones"],["Yesterday","The Beatles"],["Help!","The Beatles"],["My Generation","The Who"],["Like a Rolling Stone","Bob Dylan"]],
+  1966: [["Good Vibrations","The Beach Boys"],["Paint It Black","The Rolling Stones"],["You Can't Hurry Love","The Supremes"],["Last Train to Clarksville","The Monkees"],["These Boots Are Made for Walkin'","Nancy Sinatra"]],
+  1967: [["Respect","Aretha Franklin"],["Light My Fire","The Doors"],["All You Need Is Love","The Beatles"],["Happy Together","The Turtles"],["Somebody to Love","Jefferson Airplane"]],
+  1968: [["Hey Jude","The Beatles"],["Sittin' on the Dock of the Bay","Otis Redding"],["Sunshine of Your Love","Cream"],["Born to Be Wild","Steppenwolf"],["Jumpin' Jack Flash","The Rolling Stones"]],
+  1969: [["Come Together","The Beatles"],["Aquarius/Let the Sunshine In","The 5th Dimension"],["I Can't Get Next to You","The Temptations"],["Honky Tonk Women","The Rolling Stones"],["Everyday People","Sly & the Family Stone"]],
+  1970: [["Let It Be","The Beatles"],["Bridge Over Troubled Water","Simon & Garfunkel"],["War","Edwin Starr"],["Ain't No Mountain High Enough","Diana Ross"],["Mama Told Me Not to Come","Three Dog Night"]],
+  1971: [["Imagine","John Lennon"],["Stairway to Heaven","Led Zeppelin"],["What's Going On","Marvin Gaye"],["Brown Sugar","The Rolling Stones"],["Riders on the Storm","The Doors"]],
+  1972: [["Superstition","Stevie Wonder"],["Lean on Me","Bill Withers"],["American Pie","Don McLean"],["Heart of Gold","Neil Young"],["Let's Stay Together","Al Green"]],
+  1973: [["Killing Me Softly","Roberta Flack"],["Let's Get It On","Marvin Gaye"],["Tie a Yellow Ribbon","Tony Orlando & Dawn"],["Crocodile Rock","Elton John"],["You're So Vain","Carly Simon"]],
+  1974: [["Kung Fu Fighting","Carl Douglas"],["Seasons in the Sun","Terry Jacks"],["The Way We Were","Barbra Streisand"],["Come and Get Your Love","Redbone"],["Cat's in the Cradle","Harry Chapin"]],
+  1975: [["Bohemian Rhapsody","Queen"],["Rhinestone Cowboy","Glen Campbell"],["Love Will Keep Us Together","Captain & Tennille"],["Fame","David Bowie"],["Shining Star","Earth, Wind & Fire"]],
+  1976: [["Hotel California","Eagles"],["Don't Go Breaking My Heart","Elton John & Kiki Dee"],["Disco Duck","Rick Dees"],["Play That Funky Music","Wild Cherry"],["December, 1963","The Four Seasons"]],
+  1977: [["Stayin' Alive","Bee Gees"],["Hotel California","Eagles"],["Don't Stop","Fleetwood Mac"],["Dreams","Fleetwood Mac"],["We Are the Champions","Queen"]],
+  1978: [["Y.M.C.A.","Village People"],["Stayin' Alive","Bee Gees"],["Night Fever","Bee Gees"],["Grease","Frankie Valli"],["Baker Street","Gerry Rafferty"]],
+  1979: [["I Will Survive","Gloria Gaynor"],["My Sharona","The Knack"],["Heart of Glass","Blondie"],["Don't Stop Me Now","Queen"],["Ring My Bell","Anita Ward"]],
+  1980: [["Another One Bites the Dust","Queen"],["Call Me","Blondie"],["Crazy Little Thing Called Love","Queen"],["Upside Down","Diana Ross"],["Funkytown","Lipps Inc"]],
+  1981: [["Don't Stop Believin'","Journey"],["Bette Davis Eyes","Kim Carnes"],["Endless Love","Diana Ross & Lionel Richie"],["Start Me Up","The Rolling Stones"],["Every Little Thing She Does Is Magic","The Police"]],
+  1982: [["Eye of the Tiger","Survivor"],["Ebony and Ivory","Paul McCartney & Stevie Wonder"],["I Love Rock 'n' Roll","Joan Jett"],["Africa","Toto"],["Don't You Want Me","The Human League"]],
+  1983: [["Every Breath You Take","The Police"],["Billie Jean","Michael Jackson"],["Beat It","Michael Jackson"],["Total Eclipse of the Heart","Bonnie Tyler"],["Sweet Dreams","Eurythmics"]],
+  1984: [["When Doves Cry","Prince"],["Jump","Van Halen"],["Karma Chameleon","Culture Club"],["Wake Me Up Before You Go-Go","Wham!"],["Footloose","Kenny Loggins"]],
+  1985: [["Take on Me","a-ha"],["Everybody Wants to Rule the World","Tears for Fears"],["Careless Whisper","George Michael"],["Don't You (Forget About Me)","Simple Minds"],["Shout","Tears for Fears"]],
+  1986: [["Walk Like an Egyptian","The Bangles"],["Livin' on a Prayer","Bon Jovi"],["Take My Breath Away","Berlin"],["Papa Don't Preach","Madonna"],["Higher Love","Steve Winwood"]],
+  1987: [["Livin' on a Prayer","Bon Jovi"],["With or Without You","U2"],["I Wanna Dance with Somebody","Whitney Houston"],["La Bamba","Los Lobos"],["Never Gonna Give You Up","Rick Astley"]],
+  1988: [["Sweet Child O' Mine","Guns N' Roses"],["Don't Worry, Be Happy","Bobby McFerrin"],["Need You Tonight","INXS"],["Pour Some Sugar on Me","Def Leppard"],["Faith","George Michael"]],
+  1989: [["Like a Prayer","Madonna"],["Straight Up","Paula Abdul"],["Every Rose Has Its Thorn","Poison"],["Right Here Waiting","Richard Marx"],["Love Shack","The B-52's"]],
+  1990: [["Ice Ice Baby","Vanilla Ice"],["Nothing Compares 2 U","Sinéad O'Connor"],["Vogue","Madonna"],["U Can't Touch This","MC Hammer"],["Enjoy the Silence","Depeche Mode"]],
+  1991: [["Smells Like Teen Spirit","Nirvana"],["Losing My Religion","R.E.M."],["Under the Bridge","Red Hot Chili Peppers"],["Unbelievable","EMF"],["Gonna Make You Sweat","C+C Music Factory"]],
+  1992: [["Baby Got Back","Sir Mix-a-Lot"],["Jump Around","House of Pain"],["End of the Road","Boyz II Men"],["November Rain","Guns N' Roses"],["Tears in Heaven","Eric Clapton"]],
+  1993: [["I Will Always Love You","Whitney Houston"],["Informer","Snow"],["Nuthin' but a 'G' Thang","Dr. Dre"],["Creep","Radiohead"],["Mr. Jones","Counting Crows"]],
+  1994: [["All I Wanna Do","Sheryl Crow"],["Bump N' Grind","R. Kelly"],["Stay","Lisa Loeb"],["Regulate","Warren G"],["Basket Case","Green Day"]],
+  1995: [["Gangsta's Paradise","Coolio"],["Waterfalls","TLC"],["Kiss from a Rose","Seal"],["Wonderwall","Oasis"],["Creep","TLC"]],
+  1996: [["Wannabe","Spice Girls"],["Macarena","Los Del Rio"],["No Diggity","Blackstreet"],["Killing Me Softly","Fugees"],["1979","The Smashing Pumpkins"]],
+  1997: [["MMMBop","Hanson"],["Bitter Sweet Symphony","The Verve"],["Barbie Girl","Aqua"],["Karma Police","Radiohead"],["Tubthumping","Chumbawamba"]],
+  1998: [["...Baby One More Time","Britney Spears"],["Iris","Goo Goo Dolls"],["Believe","Cher"],["Ray of Light","Madonna"],["Torn","Natalie Imbruglia"]],
+  1999: [["Livin' la Vida Loca","Ricky Martin"],["...Baby One More Time","Britney Spears"],["No Scrubs","TLC"],["Smooth","Santana ft. Rob Thomas"],["Genie in a Bottle","Christina Aguilera"]],
+  2000: [["Bye Bye Bye","NSYNC"],["It Wasn't Me","Shaggy"],["Say My Name","Destiny's Child"],["Breathe","Faith Hill"],["Stan","Eminem"]],
+  2001: [["Crazy in Love","Beyoncé"],["Fallin'","Alicia Keys"],["Hanging by a Moment","Lifehouse"],["Lady Marmalade","Christina Aguilera & others"],["Drops of Jupiter","Train"]],
+  2002: [["Lose Yourself","Eminem"],["Hot in Herre","Nelly"],["Complicated","Avril Lavigne"],["Dilemma","Nelly ft. Kelly Rowland"],["A Thousand Miles","Vanessa Carlton"]],
+  2003: [["Hey Ya!","OutKast"],["Crazy in Love","Beyoncé"],["In Da Club","50 Cent"],["Bring Me to Life","Evanescence"],["Where Is the Love?","Black Eyed Peas"]],
+  2004: [["Yeah!","Usher"],["Toxic","Britney Spears"],["Hey Ya!","OutKast"],["This Love","Maroon 5"],["1985","Bowling for Soup"]],
+  2005: [["Gold Digger","Kanye West"],["Since U Been Gone","Kelly Clarkson"],["Feel Good Inc.","Gorillaz"],["Boulevard of Broken Dreams","Green Day"],["Mr. Brightside","The Killers"]],
+  2006: [["Hips Don't Lie","Shakira"],["Crazy","Gnarls Barkley"],["SexyBack","Justin Timberlake"],["SOS","Rihanna"],["Promiscuous","Nelly Furtado"]],
+  2007: [["Umbrella","Rihanna"],["Stronger","Kanye West"],["Hey There Delilah","Plain White T's"],["Rehab","Amy Winehouse"],["Apologize","Timbaland ft. OneRepublic"]],
+  2008: [["Viva la Vida","Coldplay"],["I Kissed a Girl","Katy Perry"],["Bleeding Love","Leona Lewis"],["Paper Planes","M.I.A."],["Single Ladies","Beyoncé"]],
+  2009: [["Poker Face","Lady Gaga"],["Boom Boom Pow","Black Eyed Peas"],["Use Somebody","Kings of Leon"],["I Gotta Feeling","Black Eyed Peas"],["Empire State of Mind","Jay-Z ft. Alicia Keys"]],
+  2010: [["Bad Romance","Lady Gaga"],["TiK ToK","Kesha"],["Love the Way You Lie","Eminem ft. Rihanna"],["California Gurls","Katy Perry"],["Telephone","Lady Gaga ft. Beyoncé"]],
+  2011: [["Rolling in the Deep","Adele"],["Someone Like You","Adele"],["Party Rock Anthem","LMFAO"],["Moves Like Jagger","Maroon 5"],["Super Bass","Nicki Minaj"]],
+  2012: [["Somebody That I Used to Know","Gotye"],["Call Me Maybe","Carly Rae Jepsen"],["We Are Young","fun."],["Gangnam Style","PSY"],["Lights","Ellie Goulding"]],
+  2013: [["Get Lucky","Daft Punk"],["Royals","Lorde"],["Wrecking Ball","Miley Cyrus"],["Blurred Lines","Robin Thicke"],["Radioactive","Imagine Dragons"]],
+  2014: [["Happy","Pharrell Williams"],["All About That Bass","Meghan Trainor"],["Shake It Off","Taylor Swift"],["Stay With Me","Sam Smith"],["Uptown Funk","Mark Ronson ft. Bruno Mars"]],
+  2015: [["Uptown Funk","Bruno Mars"],["See You Again","Wiz Khalifa ft. Charlie Puth"],["Thinking Out Loud","Ed Sheeran"],["Can't Feel My Face","The Weeknd"],["Lean On","Major Lazer & DJ Snake"]],
+  2016: [["Stressed Out","Twenty One Pilots"],["Cheap Thrills","Sia"],["Closer","The Chainsmokers"],["One Dance","Drake"],["Don't Let Me Down","The Chainsmokers"]],
+  2017: [["Shape of You","Ed Sheeran"],["Despacito","Luis Fonsi ft. Daddy Yankee"],["Humble","Kendrick Lamar"],["Rockstar","Post Malone"],["That's What I Like","Bruno Mars"]],
+  2018: [["God's Plan","Drake"],["Havana","Camila Cabello"],["Sicko Mode","Travis Scott"],["I Like It","Cardi B"],["Thank U, Next","Ariana Grande"]],
+  2019: [["Old Town Road","Lil Nas X"],["Bad Guy","Billie Eilish"],["Señorita","Shawn Mendes & Camila Cabello"],["Sunflower","Post Malone & Swae Lee"],["Truth Hurts","Lizzo"]],
+  2020: [["Blinding Lights","The Weeknd"],["Rockstar","DaBaby ft. Roddy Ricch"],["Watermelon Sugar","Harry Styles"],["Don't Start Now","Dua Lipa"],["Savage","Megan Thee Stallion ft. Beyoncé"]],
+  2021: [["Levitating","Dua Lipa"],["drivers license","Olivia Rodrigo"],["Kiss Me More","Doja Cat ft. SZA"],["Montero","Lil Nas X"],["good 4 u","Olivia Rodrigo"]],
+  2022: [["As It Was","Harry Styles"],["About Damn Time","Lizzo"],["Heat Waves","Glass Animals"],["Running Up That Hill","Kate Bush"],["Anti-Hero","Taylor Swift"]],
+  2023: [["Flowers","Miley Cyrus"],["Kill Bill","SZA"],["Cruel Summer","Taylor Swift"],["Vampire","Olivia Rodrigo"],["Last Night","Morgan Wallen"]],
+  2024: [["Espresso","Sabrina Carpenter"],["Not Like Us","Kendrick Lamar"],["A Bar Song (Tipsy)","Shaboozey"],["Birds of a Feather","Billie Eilish"],["Beautiful Things","Benson Boone"]],
+  2025: [["APT.","ROSÉ & Bruno Mars"],["Die With a Smile","Lady Gaga & Bruno Mars"],["Luther","Kendrick Lamar ft. SZA"],["Timeless","The Weeknd & Playboi Carti"],["Abracadabra","Lady Gaga"]],
+};
+
+const knownMovies = {
+  1940: [["The Great Dictator"],["Fantasia"],["Rebecca"],["The Philadelphia Story"],["Pinocchio"]],
+  1941: [["Citizen Kane"],["Dumbo"],["The Maltese Falcon"],["How Green Was My Valley"],["Sergeant York"]],
+  1942: [["Casablanca"],["Bambi"],["Mrs. Miniver"],["Yankee Doodle Dandy"],["The Magnificent Ambersons"]],
+  1943: [["Shadow of a Doubt"],["For Whom the Bell Tolls"],["The Ox-Bow Incident"],["Heaven Can Wait"],["Sahara"]],
+  1944: [["Double Indemnity"],["Gaslight"],["Going My Way"],["Meet Me in St. Louis"],["Laura"]],
+  1945: [["Brief Encounter"],["Mildred Pierce"],["The Lost Weekend"],["Spellbound"],["The Bells of St. Mary's"]],
+  1946: [["It's a Wonderful Life"],["The Best Years of Our Lives"],["Notorious"],["The Big Sleep"],["Duel in the Sun"]],
+  1947: [["Miracle on 34th Street"],["Gentleman's Agreement"],["Out of the Past"],["The Bishop's Wife"],["Black Narcissus"]],
+  1948: [["The Treasure of the Sierra Madre"],["Rope"],["The Red Shoes"],["Key Largo"],["Hamlet"]],
+  1949: [["The Third Man"],["All the King's Men"],["Adam's Rib"],["She Wore a Yellow Ribbon"],["White Heat"]],
+  1950: [["All About Eve"],["Sunset Boulevard"],["Cinderella"],["Rashomon"],["In a Lonely Place"]],
+  1951: [["A Streetcar Named Desire"],["The African Queen"],["Alice in Wonderland"],["Strangers on a Train"],["An American in Paris"]],
+  1952: [["Singin' in the Rain"],["High Noon"],["The Greatest Show on Earth"],["Limelight"],["Ikiru"]],
+  1953: [["Roman Holiday"],["From Here to Eternity"],["Shane"],["Peter Pan"],["Stalag 17"]],
+  1954: [["Rear Window"],["On the Waterfront"],["Seven Samurai"],["20,000 Leagues Under the Sea"],["A Star Is Born"]],
+  1955: [["Rebel Without a Cause"],["Lady and the Tramp"],["East of Eden"],["The Night of the Hunter"],["Marty"]],
+  1956: [["The Ten Commandments"],["The Searchers"],["Giant"],["The King and I"],["Around the World in 80 Days"]],
+  1957: [["12 Angry Men"],["The Bridge on the River Kwai"],["Paths of Glory"],["Funny Face"],["Witness for the Prosecution"]],
+  1958: [["Vertigo"],["Touch of Evil"],["The Defiant Ones"],["Cat on a Hot Tin Roof"],["Mon Oncle"]],
+  1959: [["Some Like It Hot"],["Ben-Hur"],["North by Northwest"],["Sleeping Beauty"],["Anatomy of a Murder"]],
+  1960: [["Psycho"],["Spartacus"],["The Apartment"],["La Dolce Vita"],["Ocean's 11"]],
+  1961: [["West Side Story"],["Breakfast at Tiffany's"],["101 Dalmatians"],["The Hustler"],["Yojimbo"]],
+  1962: [["Lawrence of Arabia"],["To Kill a Mockingbird"],["Dr. No"],["The Man Who Shot Liberty Valance"],["The Manchurian Candidate"]],
+  1963: [["The Birds"],["The Great Escape"],["Cleopatra"],["The Pink Panther"],["8½"]],
+  1964: [["Mary Poppins"],["Goldfinger"],["My Fair Lady"],["A Hard Day's Night"],["Dr. Strangelove"]],
+  1965: [["The Sound of Music"],["Doctor Zhivago"],["Thunderball"],["For a Few Dollars More"],["A Thousand Clowns"]],
+  1966: [["The Good, the Bad and the Ugly"],["Who's Afraid of Virginia Woolf?"],["Blow-Up"],["Alfie"],["Fahrenheit 451"]],
+  1967: [["The Graduate"],["Bonnie and Clyde"],["Cool Hand Luke"],["The Jungle Book"],["In the Heat of the Night"]],
+  1968: [["2001: A Space Odyssey"],["Planet of the Apes"],["Rosemary's Baby"],["Night of the Living Dead"],["Once Upon a Time in the West"]],
+  1969: [["Butch Cassidy and the Sundance Kid"],["Easy Rider"],["Midnight Cowboy"],["The Wild Bunch"],["True Grit"]],
+  1970: [["Patton"],["MASH"],["Love Story"],["Five Easy Pieces"],["Tora! Tora! Tora!"]],
+  1971: [["A Clockwork Orange"],["Willy Wonka & the Chocolate Factory"],["The French Connection"],["Dirty Harry"],["Fiddler on the Roof"]],
+  1972: [["The Godfather"],["Deliverance"],["Cabaret"],["The Poseidon Adventure"],["Solaris"]],
+  1973: [["The Exorcist"],["The Sting"],["American Graffiti"],["Enter the Dragon"],["Papillon"]],
+  1974: [["The Godfather Part II"],["Chinatown"],["Blazing Saddles"],["Young Frankenstein"],["The Texas Chain Saw Massacre"]],
+  1975: [["Jaws"],["One Flew Over the Cuckoo's Nest"],["Monty Python and the Holy Grail"],["Dog Day Afternoon"],["Barry Lyndon"]],
+  1976: [["Rocky"],["Taxi Driver"],["All the President's Men"],["Network"],["The Omen"]],
+  1977: [["Star Wars"],["Close Encounters of the Third Kind"],["Annie Hall"],["Saturday Night Fever"],["Smokey and the Bandit"]],
+  1978: [["Grease"],["Superman"],["Halloween"],["Animal House"],["The Deer Hunter"]],
+  1979: [["Alien"],["Apocalypse Now"],["Kramer vs. Kramer"],["Mad Max"],["The Muppet Movie"]],
+  1980: [["The Shining"],["The Empire Strikes Back"],["Airplane!"],["Raging Bull"],["The Blues Brothers"]],
+  1981: [["Raiders of the Lost Ark"],["Chariots of Fire"],["An American Werewolf in London"],["Time Bandits"],["Das Boot"]],
+  1982: [["E.T. the Extra-Terrestrial"],["Blade Runner"],["The Thing"],["Poltergeist"],["Tootsie"]],
+  1983: [["Scarface"],["Return of the Jedi"],["A Christmas Story"],["The Right Stuff"],["WarGames"]],
+  1984: [["The Terminator"],["Ghostbusters"],["The Karate Kid"],["A Nightmare on Elm Street"],["Beverly Hills Cop"]],
+  1985: [["Back to the Future"],["The Breakfast Club"],["The Goonies"],["Rocky IV"],["Commando"]],
+  1986: [["Top Gun"],["Ferris Bueller's Day Off"],["Aliens"],["Stand by Me"],["The Fly"]],
+  1987: [["The Princess Bride"],["Full Metal Jacket"],["Predator"],["RoboCop"],["Lethal Weapon"]],
+  1988: [["Die Hard"],["Rain Man"],["Who Framed Roger Rabbit"],["Beetlejuice"],["Big"]],
+  1989: [["Batman"],["Indiana Jones and the Last Crusade"],["The Little Mermaid"],["Dead Poets Society"],["When Harry Met Sally"]],
+  1990: [["Home Alone"],["Goodfellas"],["Edward Scissorhands"],["Total Recall"],["Ghost"]],
+  1991: [["The Silence of the Lambs"],["Terminator 2: Judgment Day"],["Beauty and the Beast"],["JFK"],["Point Break"]],
+  1992: [["Aladdin"],["Reservoir Dogs"],["A Few Good Men"],["Unforgiven"],["Wayne's World"]],
+  1993: [["Jurassic Park"],["Schindler's List"],["Groundhog Day"],["The Fugitive"],["Mrs. Doubtfire"]],
+  1994: [["The Lion King"],["Pulp Fiction"],["Forrest Gump"],["The Shawshank Redemption"],["Speed"]],
+  1995: [["Toy Story"],["Se7en"],["Braveheart"],["Heat"],["Clueless"]],
+  1996: [["Independence Day"],["Fargo"],["Scream"],["Mission: Impossible"],["Trainspotting"]],
+  1997: [["Titanic"],["Good Will Hunting"],["L.A. Confidential"],["The Fifth Element"],["Men in Black"]],
+  1998: [["Saving Private Ryan"],["The Truman Show"],["The Big Lebowski"],["There's Something About Mary"],["Armageddon"]],
+  1999: [["The Matrix"],["Fight Club"],["The Sixth Sense"],["American Beauty"],["The Mummy"]],
+  2000: [["Gladiator"],["Memento"],["Cast Away"],["X-Men"],["Snatch"]],
+  2001: [["Harry Potter and the Philosopher's Stone"],["The Lord of the Rings: The Fellowship of the Ring"],["Shrek"],["A Beautiful Mind"],["Ocean's Eleven"]],
+  2002: [["Spider-Man"],["The Lord of the Rings: The Two Towers"],["Catch Me If You Can"],["Harry Potter and the Chamber of Secrets"],["Ice Age"]],
+  2003: [["Finding Nemo"],["The Lord of the Rings: The Return of the King"],["Pirates of the Caribbean: The Curse of the Black Pearl"],["Kill Bill: Vol. 1"],["Elf"]],
+  2004: [["The Incredibles"],["Shrek 2"],["Harry Potter and the Prisoner of Azkaban"],["Spider-Man 2"],["Eternal Sunshine of the Spotless Mind"]],
+  2005: [["Batman Begins"],["Harry Potter and the Goblet of Fire"],["Star Wars: Episode III"],["War of the Worlds"],["Sin City"]],
+  2006: [["Cars"],["The Departed"],["Casino Royale"],["Pirates of the Caribbean: Dead Man's Chest"],["The Prestige"]],
+  2007: [["Ratatouille"],["No Country for Old Men"],["Harry Potter and the Order of the Phoenix"],["Superbad"],["300"]],
+  2008: [["The Dark Knight"],["WALL-E"],["Iron Man"],["Kung Fu Panda"],["Slumdog Millionaire"]],
+  2009: [["Avatar"],["Up"],["Inglourious Basterds"],["The Hangover"],["District 9"]],
+  2010: [["Inception"],["Toy Story 3"],["The Social Network"],["Harry Potter and the Deathly Hallows Part 1"],["Shutter Island"]],
+  2011: [["Harry Potter and the Deathly Hallows Part 2"],["The Help"],["Rise of the Planet of the Apes"],["Drive"],["Hugo"]],
+  2012: [["The Avengers"],["The Dark Knight Rises"],["Skyfall"],["Django Unchained"],["The Hunger Games"]],
+  2013: [["Frozen"],["Gravity"],["The Wolf of Wall Street"],["12 Years a Slave"],["The Hunger Games: Catching Fire"]],
+  2014: [["Guardians of the Galaxy"],["Interstellar"],["The Lego Movie"],["Gone Girl"],["Big Hero 6"]],
+  2015: [["Star Wars: The Force Awakens"],["Mad Max: Fury Road"],["Inside Out"],["The Martian"],["Jurassic World"]],
+  2016: [["Moana"],["Deadpool"],["Zootopia"],["Rogue One"],["Doctor Strange"]],
+  2017: [["Spider-Man: Homecoming"],["Thor: Ragnarok"],["Get Out"],["Coco"],["Wonder Woman"]],
+  2018: [["Avengers: Infinity War"],["Black Panther"],["Spider-Man: Into the Spider-Verse"],["A Quiet Place"],["Bohemian Rhapsody"]],
+  2019: [["Avengers: Endgame"],["Joker"],["Parasite"],["Toy Story 4"],["Knives Out"]],
+  2020: [["Soul"],["Tenet"],["Onward"],["The Invisible Man"],["Palm Springs"]],
+  2021: [["Spider-Man: No Way Home"],["Dune"],["Shang-Chi"],["No Time to Die"],["Encanto"]],
+  2022: [["Top Gun: Maverick"],["Everything Everywhere All at Once"],["The Batman"],["Black Panther: Wakanda Forever"],["Glass Onion"]],
+  2023: [["Barbie"],["Oppenheimer"],["Guardians of the Galaxy Vol. 3"],["Spider-Man: Across the Spider-Verse"],["John Wick: Chapter 4"]],
+  2024: [["Inside Out 2"],["Dune: Part Two"],["Deadpool & Wolverine"],["Wicked"],["Gladiator II"]],
+  2025: [["Captain America: Brave New World"],["Paddington in Peru"],["The Brutalist"],["Mickey 17"],["Thunderbolts*"]],
+};
+
+let currentType = 'song';
+let selectedItem = null; // { name, artist, year, artwork }
+let debounceTimer = null;
+
+const searchInput = document.getElementById('searchInput');
+const dropdown = document.getElementById('dropdown');
+const selectedPill = document.getElementById('selectedPill');
+
+function setType(type) {
+  currentType = type;
+  document.getElementById('typeLabel').textContent = type;
+  document.querySelectorAll('.type-toggle button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  searchInput.placeholder = `Type to search ${type}s...`;
+  clearSelection();
+}
+
+function clearSelection() {
+  selectedItem = null;
+  searchInput.value = '';
+  searchInput.style.display = '';
+  selectedPill.style.display = 'none';
+  dropdown.classList.remove('open');
+}
+
+function selectItem(item) {
+  selectedItem = item;
+  dropdown.classList.remove('open');
+  searchInput.style.display = 'none';
+  selectedPill.style.display = 'inline-flex';
+  const artworkHtml = item.artwork ? `<img src="${item.artwork}" alt="">` : '';
+  const artistHtml = item.artist ? ` - ${item.artist}` : '';
+  selectedPill.innerHTML = `${artworkHtml} ${item.name}${artistHtml} (${item.year}) <span class="remove" onclick="clearSelection()">&times;</span>`;
+  selectedPill.className = 'selected-pill';
+}
+
+async function searchItems(query) {
+  if (currentType === 'song') {
+    const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=15`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    return data.results.map(r => ({
+      name: r.trackName,
+      artist: r.artistName,
+      year: new Date(r.releaseDate).getFullYear(),
+      artwork: r.artworkUrl100 || r.artworkUrl60 || '',
+    }));
+  } else {
+    const url = `https://www.omdbapi.com/?s=${encodeURIComponent(query)}&type=movie&apikey=trilogy`;
+    const resp = await fetch(url);
+    const data = await resp.json();
+    if (!data.Search) return [];
+    return data.Search.map(r => ({
+      name: r.Title,
+      artist: '',
+      year: parseInt(r.Year) || 0,
+      artwork: r.Poster !== 'N/A' ? r.Poster : '',
+    }));
+  }
+}
+
+function renderResults(results) {
+  dropdown.innerHTML = '';
+  if (results.length === 0) {
+    dropdown.innerHTML = '<div class="loading">No results found</div>';
+  } else {
+    results.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'item';
+      const artworkHtml = item.artwork ? `<img src="${item.artwork}" alt="">` : '';
+      const artistHtml = item.artist ? `<span class="meta">${item.artist}</span>` : '';
+      div.innerHTML = `${artworkHtml}<div class="info"><div class="title">${item.name}</div>${artistHtml}</div><span class="year-tag">${item.year}</span>`;
+      div.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        selectItem(item);
+      });
+      dropdown.appendChild(div);
+    });
+  }
+  dropdown.classList.add('open');
+}
+
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim();
+  clearTimeout(debounceTimer);
+  if (q.length < 2) {
+    dropdown.classList.remove('open');
+    return;
+  }
+  dropdown.innerHTML = '<div class="loading">Searching...</div>';
+  dropdown.classList.add('open');
+  debounceTimer = setTimeout(async () => {
+    try {
+      const results = await searchItems(q);
+      renderResults(results);
+    } catch (e) {
+      dropdown.innerHTML = '<div class="loading">Search failed. Try again.</div>';
+    }
+  }, 350);
+});
+
+searchInput.addEventListener('blur', () => setTimeout(() => dropdown.classList.remove('open'), 200));
+searchInput.addEventListener('focus', () => {
+  if (searchInput.value.trim().length >= 2) {
+    searchItems(searchInput.value.trim()).then(renderResults);
+  }
+});
+
+function findEquivalent(year) {
+  const known = currentType === 'song' ? knownSongs : knownMovies;
+  let targetYear = year;
+  if (!known[year]) {
+    let best = null, bestDiff = Infinity;
+    for (const y of Object.keys(known)) {
+      const diff = Math.abs(parseInt(y) - year);
+      if (diff < bestDiff) { bestDiff = diff; best = parseInt(y); }
+    }
+    targetYear = best;
+  }
+  const list = known[targetYear];
+  const pick = list[Math.floor(Math.random() * list.length)];
+  return { name: pick[0], artist: pick[1] || '', year: targetYear };
+}
+
+async function fetchArtwork(name, artist, type) {
+  try {
+    if (type === 'song') {
+      const q = artist ? `${name} ${artist}` : name;
+      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&entity=song&limit=1`;
+      const resp = await fetch(url);
+      const data = await resp.json();
+      if (data.results && data.results[0]) {
+        return (data.results[0].artworkUrl100 || '').replace('100x100', '300x300');
+      }
+    } else {
+      const url = `https://www.omdbapi.com/?t=${encodeURIComponent(name)}&type=movie&apikey=trilogy`;
+      const resp = await fetch(url);
+      const data = await resp.json();
+      if (data.Poster && data.Poster !== 'N/A') return data.Poster;
+    }
+  } catch (e) {}
+  return '';
+}
+
+async function calculate() {
+  const parentYear = parseInt(document.getElementById('parentYear').value);
+  const childYear = parseInt(document.getElementById('childYear').value);
+
+  if (!parentYear || !childYear || !selectedItem) {
+    alert('Please fill in all fields!');
+    return;
+  }
+
+  const picked = selectedItem;
+  const pickedYear = picked.year;
+  const ageDiff = childYear - pickedYear;
+  const equivalentYear = parentYear - ageDiff;
+
+  const equivalent = findEquivalent(equivalentYear);
+
+  const res = document.getElementById('result');
+  res.style.display = 'block';
+
+  document.getElementById('resultIntro').textContent =
+    `For your child, "${picked.name}" feels like...`;
+
+  // Picked card
+  const pickedArtSrc = picked.artwork ? picked.artwork.replace('100x100', '300x300') : '';
+  document.getElementById('pickedArt').src = pickedArtSrc;
+  document.getElementById('pickedArt').style.display = pickedArtSrc ? '' : 'none';
+  document.getElementById('pickedName').textContent = picked.name;
+  document.getElementById('pickedArtist').textContent = picked.artist || '';
+  document.getElementById('pickedYear').textContent = pickedYear;
+
+  // Equivalent card — show placeholder then fetch artwork
+  document.getElementById('equivArt').style.display = 'none';
+  document.getElementById('equivName').textContent = equivalent.name;
+  document.getElementById('equivArtist').textContent = equivalent.artist || '';
+  document.getElementById('equivYear').textContent = equivalent.year;
+
+  document.getElementById('resultExplanation').innerHTML =
+    `<strong>"${picked.name}"</strong> (${pickedYear}) is <strong>${ageDiff} years old</strong> to your child (born ${childYear}).<br><br>` +
+    `That's like <strong>"${equivalent.name}"</strong> (${equivalent.year}) was to you when you were born in ${parentYear} &mdash; also about <strong>${Math.abs(parentYear - equivalent.year)} years old</strong>.`;
+
+  res.scrollIntoView({ behavior: 'smooth' });
+
+  // Fetch equivalent artwork in background
+  const equivArt = await fetchArtwork(equivalent.name, equivalent.artist, currentType);
+  if (equivArt) {
+    document.getElementById('equivArt').src = equivArt;
+    document.getElementById('equivArt').style.display = '';
+  }
+}
+</script>
+</body>
+</html>
