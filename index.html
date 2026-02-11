@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Age Perspective</title>
+<title>Altersperspektive</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -36,7 +36,7 @@
     margin-top: 32px; padding: 24px; border-radius: 12px;
     background: #16213e; display: none; text-align: center;
   }
-  #result h2 { font-size: 1.1rem; color: #aaa; margin-bottom: 12px; }
+  #result h2 { font-size: 1.05rem; color: #aaa; margin-bottom: 12px; line-height: 1.5; }
   .result-comparison {
     display: flex; gap: 20px; justify-content: center; align-items: flex-start;
     margin-top: 16px; flex-wrap: wrap;
@@ -61,7 +61,7 @@
   #result .explanation strong { color: #eee; }
   .type-toggle { display: flex; gap: 8px; margin-bottom: 20px; }
   .type-toggle button {
-    flex: 1; padding: 8px; font-size: 0.9rem; background: #16213e; border: 1px solid #333;
+    flex: 1; padding: 8px; font-size: 0.85rem; background: #16213e; border: 1px solid #333;
   }
   .type-toggle button.active { background: #e94560; border-color: #e94560; }
   .type-toggle button:hover:not(.active) { background: #1f3060; }
@@ -100,33 +100,34 @@
 </head>
 <body>
 <div class="container">
-  <h1>Age Perspective</h1>
-  <p class="subtitle">That "recent" song? Here's what it feels like to your kid.</p>
+  <h1>Altersperspektive</h1>
+  <p class="subtitle">De "neui" Song? So fühlt sich das für dis Chind aa.</p>
 
   <div class="row">
     <div>
-      <label>Your year of birth</label>
-      <input type="number" id="parentYear" placeholder="e.g. 1985" min="1900" max="2020">
+      <label>Dis Geburtsjahr</label>
+      <input type="number" id="parentYear" placeholder="z.B. 1985" min="1900" max="2020">
     </div>
     <div>
-      <label>Child's year of birth</label>
-      <input type="number" id="childYear" placeholder="e.g. 2015" min="1920" max="2026">
+      <label>Geburtsjahr vom Chind</label>
+      <input type="number" id="childYear" placeholder="z.B. 2015" min="1920" max="2026">
     </div>
   </div>
 
   <div class="type-toggle">
     <button class="active" onclick="setType('song')">Songs</button>
-    <button onclick="setType('movie')">Movies</button>
+    <button onclick="setType('movie')">Filme</button>
+    <button onclick="setType('mundart')">Mundart</button>
   </div>
 
-  <label>Search for a <span id="typeLabel">song</span></label>
+  <label>Such en <span id="typeLabel">Song</span></label>
   <div class="search-wrap">
-    <input type="text" id="searchInput" placeholder="Type to search songs..." autocomplete="off">
+    <input type="text" id="searchInput" placeholder="Tippe zum Sueche..." autocomplete="off">
     <div class="dropdown" id="dropdown"></div>
   </div>
   <div id="selectedPill" style="display:none"></div>
 
-  <button onclick="calculate()">Show me the perspective</button>
+  <button onclick="calculate()">Zeig mir d'Perspektive</button>
 
   <div id="result">
     <h2 id="resultIntro"></h2>
@@ -137,7 +138,7 @@
         <div class="card-artist" id="pickedArtist"></div>
         <div class="card-year" id="pickedYear"></div>
       </div>
-      <div class="result-arrow">→</div>
+      <div class="result-arrow">&rarr;</div>
       <div class="result-card equivalent">
         <img id="equivArt" src="" alt="">
         <div class="card-title" id="equivName"></div>
@@ -150,7 +151,6 @@
 </div>
 
 <script>
-// Curated lists: 5 songs and 5 movies per year (randomly picked for the equivalent)
 const knownSongs = {
   1940: [["In the Mood","Glenn Miller"],["When You Wish Upon a Star","Cliff Edwards"],["Fools Rush In","Glenn Miller"],["Imagination","Glenn Miller"],["Tuxedo Junction","Glenn Miller"]],
   1941: [["Chattanooga Choo Choo","Glenn Miller"],["Boogie Woogie Bugle Boy","The Andrews Sisters"],["I Don't Want to Set the World on Fire","The Ink Spots"],["Blues in the Night","Woody Herman"],["Amapola","Jimmy Dorsey"]],
@@ -329,20 +329,97 @@ const knownMovies = {
   2025: [["Captain America: Brave New World"],["Paddington in Peru"],["The Brutalist"],["Mickey 17"],["Thunderbolts*"]],
 };
 
+const knownMundart = {
+  1955: [["S Vreneli ab em Guggisberg","Vreneli"],["Gilberte de Courgenay","Robert Tremp"],["De Sennepupp","Ruedi Rymann"],["Dr Schacher Seppli","Ruedi Rymann"],["Im Aargäu sind zwöi Liebi","Volkslied"]],
+  1956: [["S Ramseiers wei go grase","Volkslied"],["Vo Luzärn gäge Weggis zue","Volkslied"],["Es Buurebüebli","Volkslied"],["Mir Senne hei's lustig","Volkslied"],["Z'Basel an mym Rhy","Volkslied"]],
+  1957: [["Min Vatter isch en Appezöller","Volkslied"],["Guggisberglied","Volkslied"],["Lueged vo Bärg und Tal","Volkslied"],["Dr Sidi Abdel Asansen","Mani Matter"],["S isch mer alles eis Ding","Volkslied"]],
+  1958: [["Ds Ämmitaler Lied","Franz Hohler"],["Mis Dach","Volkslied"],["Bim Coiffeur","Mani Matter"],["We dr Räge a ds Fänschter schlaht","Volkslied"],["De Schwyzer","Volkslied"]],
+  1959: [["Zoogä-n-am Boogä","Ruedi Rymann"],["Wär nid wott ha","Volkslied"],["Es Burebüebli","Volkslied"],["Am ene Sunntig am Morge","Volkslied"],["De Bergbach","Volkslied"]],
+  1960: [["Ds Lied vo de Bahnhöf","Mani Matter"],["I han es Zündhölzli azündt","Mani Matter"],["Bim Coiffeur","Mani Matter"],["Dr Hansjakobli","Mani Matter"],["Hemmige","Mani Matter"]],
+  1961: [["Dr Noah","Mani Matter"],["Ds Lied vo dä Chüngel","Mani Matter"],["Warum syt dir so truurig?","Mani Matter"],["Us emene lääre Gygechaste","Mani Matter"],["Dr Eskimo","Mani Matter"]],
+  1962: [["Ir Ysebahn","Mani Matter"],["Dynamit","Mani Matter"],["S isch äben e Mönsch uf Ärde","Mani Matter"],["Bim Coiffeur","Mani Matter"],["Dr Alpeflug","Mani Matter"]],
+  1963: [["I han en Uhr erfunde","Mani Matter"],["Ds Totemügerli","Mani Matter"],["Ballade","Mani Matter"],["D Zyt vergeit","Mani Matter"],["Dr Ferdinand","Mani Matter"]],
+  1964: [["Hemmige","Mani Matter"],["Dr Sidi Abdel Asansen","Mani Matter"],["Ds Lied vom Polizischt","Mani Matter"],["Dr Kolumbus","Mani Matter"],["Mir hei e Verein","Mani Matter"]],
+  1965: [["Ds Zündhölzli","Mani Matter"],["Dr Hansjakobli und ds Babettli","Mani Matter"],["I han es Zündhölzli azündt","Mani Matter"],["Ds Rötteli","Mani Matter"],["Dynamit","Mani Matter"]],
+  1966: [["Ir Ysebahn","Mani Matter"],["Bim Coiffeur","Mani Matter"],["Dr Kolumbus","Mani Matter"],["Ds Totemügerli","Mani Matter"],["Warum syt dir so truurig?","Mani Matter"]],
+  1967: [["Hemmige","Mani Matter"],["Dr Sidi Abdel Asansen","Mani Matter"],["Us emene lääre Gygechaste","Mani Matter"],["Dr Ferdinand","Mani Matter"],["Dr Alpeflug","Mani Matter"]],
+  1968: [["I han en Uhr erfunde","Mani Matter"],["Ds Lied vo de Bahnhöf","Mani Matter"],["Dr Eskimo","Mani Matter"],["D Zyt vergeit","Mani Matter"],["Ds Rötteli","Mani Matter"]],
+  1969: [["Ds Totemügerli","Mani Matter"],["Dr Noah","Mani Matter"],["Hemmige","Mani Matter"],["Bim Coiffeur","Mani Matter"],["Ir Ysebahn","Mani Matter"]],
+  1970: [["Ds Zündhölzli","Mani Matter"],["Ballade","Mani Matter"],["D Zyt vergeit","Mani Matter"],["Dr Sidi Abdel Asansen","Mani Matter"],["Dr Ferdinand","Mani Matter"]],
+  1971: [["Ds Totemügerli","Mani Matter"],["Hemmige","Mani Matter"],["Dr Hansjakobli und ds Babettli","Mani Matter"],["I han en Uhr erfunde","Mani Matter"],["Ir Ysebahn","Mani Matter"]],
+  1972: [["Ds Zündhölzli","Mani Matter"],["Dr Sidi Abdel Asansen","Mani Matter"],["Bim Coiffeur","Mani Matter"],["Dynamit","Mani Matter"],["D Zyt vergeit","Mani Matter"]],
+  1973: [["Dr Kolumbus","Mani Matter"],["Ds Totemügerli","Mani Matter"],["I han en Uhr erfunde","Mani Matter"],["Hemmige","Mani Matter"],["Ir Ysebahn","Mani Matter"]],
+  1974: [["Ds Lied vo de Bahnhöf","Mani Matter"],["Us emene lääre Gygechaste","Mani Matter"],["Dr Ferdinand","Mani Matter"],["Dr Alpeflug","Mani Matter"],["Dr Eskimo","Mani Matter"]],
+  1975: [["S Vreneli ab em Guggisberg","Trio Eugster"],["Schacher Seppli","Ruedi Rymann"],["Zoogä-n-am Boogä","Ruedi Rymann"],["Es Buurebüebli","Ruedi Rymann"],["Mis Dörfli","Ruedi Rymann"]],
+  1976: [["Alperose","Polo Hofer"],["Dr Gigi vo Arlesheim","Polo Hofer"],["Kiosk","Polo Hofer"],["Bim Coiffeur","Mani Matter"],["Ds Totemügerli","Mani Matter"]],
+  1977: [["Scharlachrot","Polo Hofer"],["Giggerig","Polo Hofer"],["Rütli-Rap","Polo Hofer"],["Ds Totemügerli","Mani Matter"],["Hemmige","Mani Matter"]],
+  1978: [["Kiosk","Polo Hofer"],["Alperose","Polo Hofer"],["Dr Gigi vo Arlesheim","Polo Hofer"],["S Vreneli ab em Guggisberg","Trio Eugster"],["Ds Zündhölzli","Mani Matter"]],
+  1979: [["Giggerig","Polo Hofer"],["Scharlachrot","Polo Hofer"],["Rütli-Rap","Polo Hofer"],["Dr Gigi vo Arlesheim","Polo Hofer"],["Kiosk","Polo Hofer"]],
+  1980: [["Alperose","Polo Hofer"],["Dr Gigi vo Arlesheim","Polo Hofer"],["Kiosk","Polo Hofer"],["Scharlachrot","Polo Hofer"],["Giggerig","Polo Hofer"]],
+  1981: [["Alperose","Polo Hofer"],["Stärnefoifi","Polo Hofer"],["Dr Gigi vo Arlesheim","Polo Hofer"],["Kiosk","Polo Hofer"],["Rütli-Rap","Polo Hofer"]],
+  1982: [["Hewas vom Dählhölzli","Züri West"],["Alperose","Polo Hofer"],["I schänke dir mis Härz","Polo Hofer"],["Giggerig","Polo Hofer"],["Kiosk","Polo Hofer"]],
+  1983: [["Alperose","Polo Hofer"],["Dr Gigi vo Arlesheim","Polo Hofer"],["Kiosk","Polo Hofer"],["Scharlachrot","Polo Hofer"],["Stärnefoifi","Polo Hofer"]],
+  1984: [["Alperose","Polo Hofer"],["Dr Gigi vo Arlesheim","Polo Hofer"],["Kiosk","Polo Hofer"],["Ds Totemügerli","Mani Matter"],["Hemmige","Mani Matter"]],
+  1985: [["Alperose","Polo Hofer"],["Kiosk","Polo Hofer"],["I schänke dir mis Härz","Polo Hofer"],["Ds Totemügerli","Mani Matter"],["Ir Ysebahn","Mani Matter"]],
+  1986: [["Alperose","Polo Hofer"],["Kiosk","Polo Hofer"],["Hewas vom Dählhölzli","Züri West"],["Dr Gigi vo Arlesheim","Polo Hofer"],["I schänke dir mis Härz","Polo Hofer"]],
+  1987: [["I schänke dir mis Härz","Polo Hofer"],["Alperose","Polo Hofer"],["Dr Gigi vo Arlesheim","Polo Hofer"],["Kiosk","Polo Hofer"],["Ds Totemügerli","Mani Matter"]],
+  1988: [["Alperose","Polo Hofer"],["Kiosk","Polo Hofer"],["Hewas vom Dählhölzli","Züri West"],["Dr Gigi vo Arlesheim","Polo Hofer"],["Scharlachrot","Polo Hofer"]],
+  1989: [["I schänke dir mis Härz","Polo Hofer"],["Alperose","Polo Hofer"],["Kiosk","Polo Hofer"],["Giggerig","Polo Hofer"],["Hewas vom Dählhölzli","Züri West"]],
+  1990: [["Alperose","Polo Hofer"],["Ds Totemügerli","Mani Matter"],["Kiosk","Polo Hofer"],["Hewas vom Dählhölzli","Züri West"],["I schänke dir mis Härz","Polo Hofer"]],
+  1991: [["Bälpmoos","Züri West"],["Alperose","Polo Hofer"],["Kiosk","Polo Hofer"],["I schänke dir mis Härz","Polo Hofer"],["Dr Gigi vo Arlesheim","Polo Hofer"]],
+  1992: [["Läbe","Züri West"],["Alperose","Polo Hofer"],["Bälpmoos","Züri West"],["Kiosk","Polo Hofer"],["I schänke dir mis Härz","Polo Hofer"]],
+  1993: [["Bälpmoos","Züri West"],["Alperose","Polo Hofer"],["Läbe","Züri West"],["Kiosk","Polo Hofer"],["Dr Gigi vo Arlesheim","Polo Hofer"]],
+  1994: [["Läbe","Züri West"],["Bälpmoos","Züri West"],["Alperose","Polo Hofer"],["I schänke dir mis Härz","Polo Hofer"],["Kiosk","Polo Hofer"]],
+  1995: [["Bälpmoos","Züri West"],["Alperose","Polo Hofer"],["Läbe","Züri West"],["Kiosk","Polo Hofer"],["Dr Gigi vo Arlesheim","Polo Hofer"]],
+  1996: [["Ds Lied vo dä Flöh","Patent Ochsner"],["Bälpmoos","Züri West"],["Alperose","Polo Hofer"],["Läbe","Züri West"],["W. Nuss vo Bümpliz","Patent Ochsner"]],
+  1997: [["W. Nuss vo Bümpliz","Patent Ochsner"],["Bälpmoos","Züri West"],["Scharlachrot","Patent Ochsner"],["Alperose","Polo Hofer"],["Ds Lied vo dä Flöh","Patent Ochsner"]],
+  1998: [["W. Nuss vo Bümpliz","Patent Ochsner"],["Bälpmoos","Züri West"],["Alperose","Polo Hofer"],["Scharlachrot","Patent Ochsner"],["Ds Lied vo dä Flöh","Patent Ochsner"]],
+  1999: [["W. Nuss vo Bümpliz","Patent Ochsner"],["Scharlachrot","Patent Ochsner"],["Bälpmoos","Züri West"],["Ds Lied vo dä Flöh","Patent Ochsner"],["Alperose","Polo Hofer"]],
+  2000: [["W. Nuss vo Bümpliz","Patent Ochsner"],["Bälpmoos","Züri West"],["Scharlachrot","Patent Ochsner"],["Alperose","Polo Hofer"],["Ds Lied vo dä Flöh","Patent Ochsner"]],
+  2001: [["W. Nuss vo Bümpliz","Patent Ochsner"],["Bälpmoos","Züri West"],["Alperose","Polo Hofer"],["Scharlachrot","Patent Ochsner"],["Ds Lied vo dä Flöh","Patent Ochsner"]],
+  2002: [["W. Nuss vo Bümpliz","Patent Ochsner"],["Alperose","Polo Hofer"],["Bälpmoos","Züri West"],["Scharlachrot","Patent Ochsner"],["Läbe","Züri West"]],
+  2003: [["W. Nuss vo Bümpliz","Patent Ochsner"],["Bälpmoos","Züri West"],["Alperose","Polo Hofer"],["Ds Lied vo dä Flöh","Patent Ochsner"],["Scharlachrot","Patent Ochsner"]],
+  2004: [["Bälpmoos","Züri West"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Alperose","Polo Hofer"],["Scharlachrot","Patent Ochsner"],["Ds Lied vo dä Flöh","Patent Ochsner"]],
+  2005: [["W. Nuss vo Bümpliz","Patent Ochsner"],["Bälpmoos","Züri West"],["Alperose","Polo Hofer"],["Ds Lied vo dä Flöh","Patent Ochsner"],["Scharlachrot","Patent Ochsner"]],
+  2006: [["Bälpmoos","Züri West"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Alperose","Polo Hofer"],["Ds Totemügerli","Mani Matter"],["Scharlachrot","Patent Ochsner"]],
+  2007: [["W. Nuss vo Bümpliz","Patent Ochsner"],["Bälpmoos","Züri West"],["Alperose","Polo Hofer"],["Dr Gigi vo Arlesheim","Polo Hofer"],["Ds Lied vo dä Flöh","Patent Ochsner"]],
+  2008: [["Bälpmoos","Züri West"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Ds Totemügerli","Mani Matter"],["Alperose","Polo Hofer"],["Scharlachrot","Patent Ochsner"]],
+  2009: [["W. Nuss vo Bümpliz","Patent Ochsner"],["Bälpmoos","Züri West"],["Alperose","Polo Hofer"],["Scharlachrot","Patent Ochsner"],["Ds Lied vo dä Flöh","Patent Ochsner"]],
+  2010: [["Dr Hell","Trauffer"],["Bälpmoos","Züri West"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Alperose","Polo Hofer"],["Scharlachrot","Patent Ochsner"]],
+  2011: [["Heiterefahne","Trauffer"],["Bälpmoos","Züri West"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Alperose","Polo Hofer"],["Dr Hell","Trauffer"]],
+  2012: [["079","Lo & Leduc"],["Bälpmoos","Züri West"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Heiterefahne","Trauffer"],["Alperose","Polo Hofer"]],
+  2013: [["079","Lo & Leduc"],["Heiterefahne","Trauffer"],["Bälpmoos","Züri West"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Alperose","Polo Hofer"]],
+  2014: [["079","Lo & Leduc"],["Heiterefahne","Trauffer"],["Bälpmoos","Züri West"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Alperose","Polo Hofer"]],
+  2015: [["079","Lo & Leduc"],["Heiterefahne","Trauffer"],["Bälpmoos","Züri West"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Alperose","Polo Hofer"]],
+  2016: [["079","Lo & Leduc"],["Heiterefahne","Trauffer"],["Bälpmoos","Züri West"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Alperose","Polo Hofer"]],
+  2017: [["079","Lo & Leduc"],["Heiterefahne","Trauffer"],["Ds Totemügerli","Mani Matter"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Bälpmoos","Züri West"]],
+  2018: [["079","Lo & Leduc"],["Heiterefahne","Trauffer"],["Bälpmoos","Züri West"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Alperose","Polo Hofer"]],
+  2019: [["079","Lo & Leduc"],["Heiterefahne","Trauffer"],["Bälpmoos","Züri West"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Alperose","Polo Hofer"]],
+  2020: [["079","Lo & Leduc"],["Heiterefahne","Trauffer"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Bälpmoos","Züri West"],["Alperose","Polo Hofer"]],
+  2021: [["Füürtüüfeli","Kunz"],["079","Lo & Leduc"],["Heiterefahne","Trauffer"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Bälpmoos","Züri West"]],
+  2022: [["Füürtüüfeli","Kunz"],["079","Lo & Leduc"],["Heiterefahne","Trauffer"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Alperose","Polo Hofer"]],
+  2023: [["Füürtüüfeli","Kunz"],["079","Lo & Leduc"],["Heiterefahne","Trauffer"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Bälpmoos","Züri West"]],
+  2024: [["Füürtüüfeli","Kunz"],["079","Lo & Leduc"],["Heiterefahne","Trauffer"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Alperose","Polo Hofer"]],
+  2025: [["Füürtüüfeli","Kunz"],["079","Lo & Leduc"],["Heiterefahne","Trauffer"],["W. Nuss vo Bümpliz","Patent Ochsner"],["Bälpmoos","Züri West"]],
+};
+
 let currentType = 'song';
-let selectedItem = null; // { name, artist, year, artwork }
+let selectedItem = null;
 let debounceTimer = null;
 
 const searchInput = document.getElementById('searchInput');
 const dropdown = document.getElementById('dropdown');
 const selectedPill = document.getElementById('selectedPill');
 
+const typeLabels = { song: 'Song', movie: 'Film', mundart: 'Mundart-Song' };
+const typePlurals = { song: 'Songs', movie: 'Filme', mundart: 'Mundart-Songs' };
+
 function setType(type) {
   currentType = type;
-  document.getElementById('typeLabel').textContent = type;
+  document.getElementById('typeLabel').textContent = typeLabels[type];
   document.querySelectorAll('.type-toggle button').forEach(b => b.classList.remove('active'));
   event.target.classList.add('active');
-  searchInput.placeholder = `Type to search ${type}s...`;
+  searchInput.placeholder = `Tippe zum ${typePlurals[type]} sueche...`;
   clearSelection();
 }
 
@@ -366,7 +443,7 @@ function selectItem(item) {
 }
 
 async function searchItems(query) {
-  if (currentType === 'song') {
+  if (currentType === 'song' || currentType === 'mundart') {
     const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=15`;
     const resp = await fetch(url);
     const data = await resp.json();
@@ -393,7 +470,7 @@ async function searchItems(query) {
 function renderResults(results) {
   dropdown.innerHTML = '';
   if (results.length === 0) {
-    dropdown.innerHTML = '<div class="loading">No results found</div>';
+    dropdown.innerHTML = '<div class="loading">Kei Ergebnis gfunde</div>';
   } else {
     results.forEach(item => {
       const div = document.createElement('div');
@@ -418,14 +495,14 @@ searchInput.addEventListener('input', () => {
     dropdown.classList.remove('open');
     return;
   }
-  dropdown.innerHTML = '<div class="loading">Searching...</div>';
+  dropdown.innerHTML = '<div class="loading">Am sueche...</div>';
   dropdown.classList.add('open');
   debounceTimer = setTimeout(async () => {
     try {
       const results = await searchItems(q);
       renderResults(results);
     } catch (e) {
-      dropdown.innerHTML = '<div class="loading">Search failed. Try again.</div>';
+      dropdown.innerHTML = '<div class="loading">Suech fehlgschlage. Probier nomal.</div>';
     }
   }, 350);
 });
@@ -437,8 +514,14 @@ searchInput.addEventListener('focus', () => {
   }
 });
 
+function getEquivList() {
+  if (currentType === 'mundart') return knownMundart;
+  if (currentType === 'movie') return knownMovies;
+  return knownSongs;
+}
+
 function findEquivalent(year) {
-  const known = currentType === 'song' ? knownSongs : knownMovies;
+  const known = getEquivList();
   let targetYear = year;
   if (!known[year]) {
     let best = null, bestDiff = Infinity;
@@ -455,7 +538,7 @@ function findEquivalent(year) {
 
 async function fetchArtwork(name, artist, type) {
   try {
-    if (type === 'song') {
+    if (type === 'song' || type === 'mundart') {
       const q = artist ? `${name} ${artist}` : name;
       const url = `https://itunes.apple.com/search?term=${encodeURIComponent(q)}&media=music&entity=song&limit=1`;
       const resp = await fetch(url);
@@ -478,7 +561,7 @@ async function calculate() {
   const childYear = parseInt(document.getElementById('childYear').value);
 
   if (!parentYear || !childYear || !selectedItem) {
-    alert('Please fill in all fields!');
+    alert('Bitte füll alli Fälder us!');
     return;
   }
 
@@ -492,9 +575,9 @@ async function calculate() {
   const res = document.getElementById('result');
   res.style.display = 'block';
 
-  const typeLabel = currentType === 'song' ? 'song' : 'movie';
+  const tl = typeLabels[currentType];
   document.getElementById('resultIntro').textContent =
-    `For your child, the ${typeLabel} "${picked.name}" feels like the ${typeLabel} "${equivalent.name}" feels for you.`;
+    `Für dis Chind fühlt sich de ${tl} "${picked.name}" aa wie für dich de ${tl} "${equivalent.name}".`;
 
   // Picked card
   const pickedArtSrc = picked.artwork ? picked.artwork.replace('100x100', '300x300') : '';
@@ -504,15 +587,15 @@ async function calculate() {
   document.getElementById('pickedArtist').textContent = picked.artist || '';
   document.getElementById('pickedYear').textContent = pickedYear;
 
-  // Equivalent card — show placeholder then fetch artwork
+  // Equivalent card
   document.getElementById('equivArt').style.display = 'none';
   document.getElementById('equivName').textContent = equivalent.name;
   document.getElementById('equivArtist').textContent = equivalent.artist || '';
   document.getElementById('equivYear').textContent = equivalent.year;
 
   document.getElementById('resultExplanation').innerHTML =
-    `<strong>"${picked.name}"</strong> (${pickedYear}) is <strong>${ageDiff} years old</strong> to your child (born ${childYear}).<br><br>` +
-    `That's like <strong>"${equivalent.name}"</strong> (${equivalent.year}) was to you when you were born in ${parentYear} &mdash; also about <strong>${Math.abs(parentYear - equivalent.year)} years old</strong>.`;
+    `<strong>"${picked.name}"</strong> (${pickedYear}) isch <strong>${ageDiff} Jahr alt</strong> für dis Chind (Jahrgang ${childYear}).<br><br>` +
+    `Das isch wie <strong>"${equivalent.name}"</strong> (${equivalent.year}) für dich gsi isch, wo du ${parentYear} uf d'Wält cho bisch &mdash; au öppe <strong>${Math.abs(parentYear - equivalent.year)} Jahr alt</strong>.`;
 
   res.scrollIntoView({ behavior: 'smooth' });
 
