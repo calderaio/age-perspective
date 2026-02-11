@@ -106,6 +106,11 @@
   .card-actions a:hover, .card-actions button:hover { background: #1f3060; }
   .preview-player { margin-top: 8px; }
   .preview-player audio { width: 160px; height: 28px; }
+  .genre-tag {
+    display: inline-block; background: #e94560; color: #fff; font-size: 0.7rem;
+    padding: 2px 8px; border-radius: 10px; vertical-align: middle; margin-left: 4px;
+    font-weight: 600;
+  }
 </style>
 </head>
 <body>
@@ -260,93 +265,94 @@ const knownSongs = {
   2025: [["APT.","ROSÉ & Bruno Mars"],["Die With a Smile","Lady Gaga & Bruno Mars"],["Luther","Kendrick Lamar ft. SZA"],["Timeless","The Weeknd & Playboi Carti"],["Abracadabra","Lady Gaga"]],
 };
 
+// Movies: [title, genre] — genres: Action, Comedy, Drama, Thriller, Sci-Fi, Horror, Animation, Adventure, Romance, Musical
 const knownMovies = {
-  1940: [["The Great Dictator"],["Fantasia"],["Rebecca"],["The Philadelphia Story"],["Pinocchio"]],
-  1941: [["Citizen Kane"],["Dumbo"],["The Maltese Falcon"],["How Green Was My Valley"],["Sergeant York"]],
-  1942: [["Casablanca"],["Bambi"],["Mrs. Miniver"],["Yankee Doodle Dandy"],["The Magnificent Ambersons"]],
-  1943: [["Shadow of a Doubt"],["For Whom the Bell Tolls"],["The Ox-Bow Incident"],["Heaven Can Wait"],["Sahara"]],
-  1944: [["Double Indemnity"],["Gaslight"],["Going My Way"],["Meet Me in St. Louis"],["Laura"]],
-  1945: [["Brief Encounter"],["Mildred Pierce"],["The Lost Weekend"],["Spellbound"],["The Bells of St. Mary's"]],
-  1946: [["It's a Wonderful Life"],["The Best Years of Our Lives"],["Notorious"],["The Big Sleep"],["Duel in the Sun"]],
-  1947: [["Miracle on 34th Street"],["Gentleman's Agreement"],["Out of the Past"],["The Bishop's Wife"],["Black Narcissus"]],
-  1948: [["The Treasure of the Sierra Madre"],["Rope"],["The Red Shoes"],["Key Largo"],["Hamlet"]],
-  1949: [["The Third Man"],["All the King's Men"],["Adam's Rib"],["She Wore a Yellow Ribbon"],["White Heat"]],
-  1950: [["All About Eve"],["Sunset Boulevard"],["Cinderella"],["Rashomon"],["In a Lonely Place"]],
-  1951: [["A Streetcar Named Desire"],["The African Queen"],["Alice in Wonderland"],["Strangers on a Train"],["An American in Paris"]],
-  1952: [["Singin' in the Rain"],["High Noon"],["The Greatest Show on Earth"],["Limelight"],["Ikiru"]],
-  1953: [["Roman Holiday"],["From Here to Eternity"],["Shane"],["Peter Pan"],["Stalag 17"]],
-  1954: [["Rear Window"],["On the Waterfront"],["Seven Samurai"],["20,000 Leagues Under the Sea"],["A Star Is Born"]],
-  1955: [["Rebel Without a Cause"],["Lady and the Tramp"],["East of Eden"],["The Night of the Hunter"],["Marty"]],
-  1956: [["The Ten Commandments"],["The Searchers"],["Giant"],["The King and I"],["Around the World in 80 Days"]],
-  1957: [["12 Angry Men"],["The Bridge on the River Kwai"],["Paths of Glory"],["Funny Face"],["Witness for the Prosecution"]],
-  1958: [["Vertigo"],["Touch of Evil"],["The Defiant Ones"],["Cat on a Hot Tin Roof"],["Mon Oncle"]],
-  1959: [["Some Like It Hot"],["Ben-Hur"],["North by Northwest"],["Sleeping Beauty"],["Anatomy of a Murder"]],
-  1960: [["Psycho"],["Spartacus"],["The Apartment"],["La Dolce Vita"],["Ocean's 11"]],
-  1961: [["West Side Story"],["Breakfast at Tiffany's"],["101 Dalmatians"],["The Hustler"],["Yojimbo"]],
-  1962: [["Lawrence of Arabia"],["To Kill a Mockingbird"],["Dr. No"],["The Man Who Shot Liberty Valance"],["The Manchurian Candidate"]],
-  1963: [["The Birds"],["The Great Escape"],["Cleopatra"],["The Pink Panther"],["8½"]],
-  1964: [["Mary Poppins"],["Goldfinger"],["My Fair Lady"],["A Hard Day's Night"],["Dr. Strangelove"]],
-  1965: [["The Sound of Music"],["Doctor Zhivago"],["Thunderball"],["For a Few Dollars More"],["A Thousand Clowns"]],
-  1966: [["The Good, the Bad and the Ugly"],["Who's Afraid of Virginia Woolf?"],["Blow-Up"],["Alfie"],["Fahrenheit 451"]],
-  1967: [["The Graduate"],["Bonnie and Clyde"],["Cool Hand Luke"],["The Jungle Book"],["In the Heat of the Night"]],
-  1968: [["2001: A Space Odyssey"],["Planet of the Apes"],["Rosemary's Baby"],["Night of the Living Dead"],["Once Upon a Time in the West"]],
-  1969: [["Butch Cassidy and the Sundance Kid"],["Easy Rider"],["Midnight Cowboy"],["The Wild Bunch"],["True Grit"]],
-  1970: [["Patton"],["MASH"],["Love Story"],["Five Easy Pieces"],["Tora! Tora! Tora!"]],
-  1971: [["A Clockwork Orange"],["Willy Wonka & the Chocolate Factory"],["The French Connection"],["Dirty Harry"],["Fiddler on the Roof"]],
-  1972: [["The Godfather"],["Deliverance"],["Cabaret"],["The Poseidon Adventure"],["Solaris"]],
-  1973: [["The Exorcist"],["The Sting"],["American Graffiti"],["Enter the Dragon"],["Papillon"]],
-  1974: [["The Godfather Part II"],["Chinatown"],["Blazing Saddles"],["Young Frankenstein"],["The Texas Chain Saw Massacre"]],
-  1975: [["Jaws"],["One Flew Over the Cuckoo's Nest"],["Monty Python and the Holy Grail"],["Dog Day Afternoon"],["Barry Lyndon"]],
-  1976: [["Rocky"],["Taxi Driver"],["All the President's Men"],["Network"],["The Omen"]],
-  1977: [["Star Wars"],["Close Encounters of the Third Kind"],["Annie Hall"],["Saturday Night Fever"],["Smokey and the Bandit"]],
-  1978: [["Grease"],["Superman"],["Halloween"],["Animal House"],["The Deer Hunter"]],
-  1979: [["Alien"],["Apocalypse Now"],["Kramer vs. Kramer"],["Mad Max"],["The Muppet Movie"]],
-  1980: [["The Shining"],["The Empire Strikes Back"],["Airplane!"],["Raging Bull"],["The Blues Brothers"]],
-  1981: [["Raiders of the Lost Ark"],["Chariots of Fire"],["An American Werewolf in London"],["Time Bandits"],["Das Boot"]],
-  1982: [["E.T. the Extra-Terrestrial"],["Blade Runner"],["The Thing"],["Poltergeist"],["Tootsie"]],
-  1983: [["Scarface"],["Return of the Jedi"],["A Christmas Story"],["The Right Stuff"],["WarGames"]],
-  1984: [["The Terminator"],["Ghostbusters"],["The Karate Kid"],["A Nightmare on Elm Street"],["Beverly Hills Cop"]],
-  1985: [["Back to the Future"],["The Breakfast Club"],["The Goonies"],["Rocky IV"],["Commando"]],
-  1986: [["Top Gun"],["Ferris Bueller's Day Off"],["Aliens"],["Stand by Me"],["The Fly"]],
-  1987: [["The Princess Bride"],["Full Metal Jacket"],["Predator"],["RoboCop"],["Lethal Weapon"]],
-  1988: [["Die Hard"],["Rain Man"],["Who Framed Roger Rabbit"],["Beetlejuice"],["Big"]],
-  1989: [["Batman"],["Indiana Jones and the Last Crusade"],["The Little Mermaid"],["Dead Poets Society"],["When Harry Met Sally"]],
-  1990: [["Home Alone"],["Goodfellas"],["Edward Scissorhands"],["Total Recall"],["Ghost"]],
-  1991: [["The Silence of the Lambs"],["Terminator 2: Judgment Day"],["Beauty and the Beast"],["JFK"],["Point Break"]],
-  1992: [["Aladdin"],["Reservoir Dogs"],["A Few Good Men"],["Unforgiven"],["Wayne's World"]],
-  1993: [["Jurassic Park"],["Schindler's List"],["Groundhog Day"],["The Fugitive"],["Mrs. Doubtfire"]],
-  1994: [["The Lion King"],["Pulp Fiction"],["Forrest Gump"],["The Shawshank Redemption"],["Speed"]],
-  1995: [["Toy Story"],["Se7en"],["Braveheart"],["Heat"],["Clueless"]],
-  1996: [["Independence Day"],["Fargo"],["Scream"],["Mission: Impossible"],["Trainspotting"]],
-  1997: [["Titanic"],["Good Will Hunting"],["L.A. Confidential"],["The Fifth Element"],["Men in Black"]],
-  1998: [["Saving Private Ryan"],["The Truman Show"],["The Big Lebowski"],["There's Something About Mary"],["Armageddon"]],
-  1999: [["The Matrix"],["Fight Club"],["The Sixth Sense"],["American Beauty"],["The Mummy"]],
-  2000: [["Gladiator"],["Memento"],["Cast Away"],["X-Men"],["Snatch"]],
-  2001: [["Harry Potter and the Philosopher's Stone"],["The Lord of the Rings: The Fellowship of the Ring"],["Shrek"],["A Beautiful Mind"],["Ocean's Eleven"]],
-  2002: [["Spider-Man"],["The Lord of the Rings: The Two Towers"],["Catch Me If You Can"],["Harry Potter and the Chamber of Secrets"],["Ice Age"]],
-  2003: [["Finding Nemo"],["The Lord of the Rings: The Return of the King"],["Pirates of the Caribbean: The Curse of the Black Pearl"],["Kill Bill: Vol. 1"],["Elf"]],
-  2004: [["The Incredibles"],["Shrek 2"],["Harry Potter and the Prisoner of Azkaban"],["Spider-Man 2"],["Eternal Sunshine of the Spotless Mind"]],
-  2005: [["Batman Begins"],["Harry Potter and the Goblet of Fire"],["Star Wars: Episode III"],["War of the Worlds"],["Sin City"]],
-  2006: [["Cars"],["The Departed"],["Casino Royale"],["Pirates of the Caribbean: Dead Man's Chest"],["The Prestige"]],
-  2007: [["Ratatouille"],["No Country for Old Men"],["Harry Potter and the Order of the Phoenix"],["Superbad"],["300"]],
-  2008: [["The Dark Knight"],["WALL-E"],["Iron Man"],["Kung Fu Panda"],["Slumdog Millionaire"]],
-  2009: [["Avatar"],["Up"],["Inglourious Basterds"],["The Hangover"],["District 9"]],
-  2010: [["Inception"],["Toy Story 3"],["The Social Network"],["Harry Potter and the Deathly Hallows Part 1"],["Shutter Island"]],
-  2011: [["Harry Potter and the Deathly Hallows Part 2"],["The Help"],["Rise of the Planet of the Apes"],["Drive"],["Hugo"]],
-  2012: [["The Avengers"],["The Dark Knight Rises"],["Skyfall"],["Django Unchained"],["The Hunger Games"]],
-  2013: [["Frozen"],["Gravity"],["The Wolf of Wall Street"],["12 Years a Slave"],["The Hunger Games: Catching Fire"]],
-  2014: [["Guardians of the Galaxy"],["Interstellar"],["The Lego Movie"],["Gone Girl"],["Big Hero 6"]],
-  2015: [["Star Wars: The Force Awakens"],["Mad Max: Fury Road"],["Inside Out"],["The Martian"],["Jurassic World"]],
-  2016: [["Moana"],["Deadpool"],["Zootopia"],["Rogue One"],["Doctor Strange"]],
-  2017: [["Spider-Man: Homecoming"],["Thor: Ragnarok"],["Get Out"],["Coco"],["Wonder Woman"]],
-  2018: [["Avengers: Infinity War"],["Black Panther"],["Spider-Man: Into the Spider-Verse"],["A Quiet Place"],["Bohemian Rhapsody"]],
-  2019: [["Avengers: Endgame"],["Joker"],["Parasite"],["Toy Story 4"],["Knives Out"]],
-  2020: [["Soul"],["Tenet"],["Onward"],["The Invisible Man"],["Palm Springs"]],
-  2021: [["Spider-Man: No Way Home"],["Dune"],["Shang-Chi"],["No Time to Die"],["Encanto"]],
-  2022: [["Top Gun: Maverick"],["Everything Everywhere All at Once"],["The Batman"],["Black Panther: Wakanda Forever"],["Glass Onion"]],
-  2023: [["Barbie"],["Oppenheimer"],["Guardians of the Galaxy Vol. 3"],["Spider-Man: Across the Spider-Verse"],["John Wick: Chapter 4"]],
-  2024: [["Inside Out 2"],["Dune: Part Two"],["Deadpool & Wolverine"],["Wicked"],["Gladiator II"]],
-  2025: [["Captain America: Brave New World"],["Paddington in Peru"],["The Brutalist"],["Mickey 17"],["Thunderbolts*"]],
+  1940: [["The Great Dictator","Comedy"],["Fantasia","Animation"],["Rebecca","Thriller"],["The Philadelphia Story","Comedy"],["Pinocchio","Animation"]],
+  1941: [["Citizen Kane","Drama"],["Dumbo","Animation"],["The Maltese Falcon","Thriller"],["How Green Was My Valley","Drama"],["Sergeant York","Drama"]],
+  1942: [["Casablanca","Drama"],["Bambi","Animation"],["Mrs. Miniver","Drama"],["Yankee Doodle Dandy","Musical"],["The Magnificent Ambersons","Drama"]],
+  1943: [["Shadow of a Doubt","Thriller"],["For Whom the Bell Tolls","Drama"],["The Ox-Bow Incident","Drama"],["Heaven Can Wait","Comedy"],["Sahara","Action"]],
+  1944: [["Double Indemnity","Thriller"],["Gaslight","Thriller"],["Going My Way","Comedy"],["Meet Me in St. Louis","Musical"],["Laura","Thriller"]],
+  1945: [["Brief Encounter","Romance"],["Mildred Pierce","Drama"],["The Lost Weekend","Drama"],["Spellbound","Thriller"],["The Bells of St. Mary's","Drama"]],
+  1946: [["It's a Wonderful Life","Drama"],["The Best Years of Our Lives","Drama"],["Notorious","Thriller"],["The Big Sleep","Thriller"],["Duel in the Sun","Drama"]],
+  1947: [["Miracle on 34th Street","Comedy"],["Gentleman's Agreement","Drama"],["Out of the Past","Thriller"],["The Bishop's Wife","Comedy"],["Black Narcissus","Drama"]],
+  1948: [["The Treasure of the Sierra Madre","Adventure"],["Rope","Thriller"],["The Red Shoes","Drama"],["Key Largo","Thriller"],["Hamlet","Drama"]],
+  1949: [["The Third Man","Thriller"],["All the King's Men","Drama"],["Adam's Rib","Comedy"],["She Wore a Yellow Ribbon","Adventure"],["White Heat","Action"]],
+  1950: [["All About Eve","Drama"],["Sunset Boulevard","Drama"],["Cinderella","Animation"],["Rashomon","Drama"],["In a Lonely Place","Thriller"]],
+  1951: [["A Streetcar Named Desire","Drama"],["The African Queen","Adventure"],["Alice in Wonderland","Animation"],["Strangers on a Train","Thriller"],["An American in Paris","Musical"]],
+  1952: [["Singin' in the Rain","Musical"],["High Noon","Action"],["The Greatest Show on Earth","Drama"],["Limelight","Drama"],["Ikiru","Drama"]],
+  1953: [["Roman Holiday","Romance"],["From Here to Eternity","Drama"],["Shane","Action"],["Peter Pan","Animation"],["Stalag 17","Drama"]],
+  1954: [["Rear Window","Thriller"],["On the Waterfront","Drama"],["Seven Samurai","Action"],["20,000 Leagues Under the Sea","Sci-Fi"],["A Star Is Born","Drama"]],
+  1955: [["Rebel Without a Cause","Drama"],["Lady and the Tramp","Animation"],["East of Eden","Drama"],["The Night of the Hunter","Thriller"],["Marty","Romance"]],
+  1956: [["The Ten Commandments","Drama"],["The Searchers","Adventure"],["Giant","Drama"],["The King and I","Musical"],["Around the World in 80 Days","Adventure"]],
+  1957: [["12 Angry Men","Drama"],["The Bridge on the River Kwai","Drama"],["Paths of Glory","Drama"],["Funny Face","Musical"],["Witness for the Prosecution","Thriller"]],
+  1958: [["Vertigo","Thriller"],["Touch of Evil","Thriller"],["The Defiant Ones","Drama"],["Cat on a Hot Tin Roof","Drama"],["Mon Oncle","Comedy"]],
+  1959: [["Some Like It Hot","Comedy"],["Ben-Hur","Action"],["North by Northwest","Thriller"],["Sleeping Beauty","Animation"],["Anatomy of a Murder","Drama"]],
+  1960: [["Psycho","Horror"],["Spartacus","Action"],["The Apartment","Comedy"],["La Dolce Vita","Drama"],["Ocean's 11","Comedy"]],
+  1961: [["West Side Story","Musical"],["Breakfast at Tiffany's","Romance"],["101 Dalmatians","Animation"],["The Hustler","Drama"],["Yojimbo","Action"]],
+  1962: [["Lawrence of Arabia","Adventure"],["To Kill a Mockingbird","Drama"],["Dr. No","Action"],["The Man Who Shot Liberty Valance","Action"],["The Manchurian Candidate","Thriller"]],
+  1963: [["The Birds","Horror"],["The Great Escape","Adventure"],["Cleopatra","Drama"],["The Pink Panther","Comedy"],["8½","Drama"]],
+  1964: [["Mary Poppins","Musical"],["Goldfinger","Action"],["My Fair Lady","Musical"],["A Hard Day's Night","Comedy"],["Dr. Strangelove","Comedy"]],
+  1965: [["The Sound of Music","Musical"],["Doctor Zhivago","Drama"],["Thunderball","Action"],["For a Few Dollars More","Action"],["A Thousand Clowns","Comedy"]],
+  1966: [["The Good, the Bad and the Ugly","Action"],["Who's Afraid of Virginia Woolf?","Drama"],["Blow-Up","Thriller"],["Alfie","Comedy"],["Fahrenheit 451","Sci-Fi"]],
+  1967: [["The Graduate","Comedy"],["Bonnie and Clyde","Action"],["Cool Hand Luke","Drama"],["The Jungle Book","Animation"],["In the Heat of the Night","Thriller"]],
+  1968: [["2001: A Space Odyssey","Sci-Fi"],["Planet of the Apes","Sci-Fi"],["Rosemary's Baby","Horror"],["Night of the Living Dead","Horror"],["Once Upon a Time in the West","Action"]],
+  1969: [["Butch Cassidy and the Sundance Kid","Adventure"],["Easy Rider","Drama"],["Midnight Cowboy","Drama"],["The Wild Bunch","Action"],["True Grit","Adventure"]],
+  1970: [["Patton","Drama"],["MASH","Comedy"],["Love Story","Romance"],["Five Easy Pieces","Drama"],["Tora! Tora! Tora!","Action"]],
+  1971: [["A Clockwork Orange","Sci-Fi"],["Willy Wonka & the Chocolate Factory","Comedy"],["The French Connection","Action"],["Dirty Harry","Action"],["Fiddler on the Roof","Musical"]],
+  1972: [["The Godfather","Drama"],["Deliverance","Thriller"],["Cabaret","Musical"],["The Poseidon Adventure","Action"],["Solaris","Sci-Fi"]],
+  1973: [["The Exorcist","Horror"],["The Sting","Comedy"],["American Graffiti","Comedy"],["Enter the Dragon","Action"],["Papillon","Adventure"]],
+  1974: [["The Godfather Part II","Drama"],["Chinatown","Thriller"],["Blazing Saddles","Comedy"],["Young Frankenstein","Comedy"],["The Texas Chain Saw Massacre","Horror"]],
+  1975: [["Jaws","Thriller"],["One Flew Over the Cuckoo's Nest","Drama"],["Monty Python and the Holy Grail","Comedy"],["Dog Day Afternoon","Drama"],["Barry Lyndon","Drama"]],
+  1976: [["Rocky","Drama"],["Taxi Driver","Thriller"],["All the President's Men","Thriller"],["Network","Drama"],["The Omen","Horror"]],
+  1977: [["Star Wars","Sci-Fi"],["Close Encounters of the Third Kind","Sci-Fi"],["Annie Hall","Comedy"],["Saturday Night Fever","Drama"],["Smokey and the Bandit","Comedy"]],
+  1978: [["Grease","Musical"],["Superman","Action"],["Halloween","Horror"],["Animal House","Comedy"],["The Deer Hunter","Drama"]],
+  1979: [["Alien","Sci-Fi"],["Apocalypse Now","Drama"],["Kramer vs. Kramer","Drama"],["Mad Max","Action"],["The Muppet Movie","Comedy"]],
+  1980: [["The Shining","Horror"],["The Empire Strikes Back","Sci-Fi"],["Airplane!","Comedy"],["Raging Bull","Drama"],["The Blues Brothers","Comedy"]],
+  1981: [["Raiders of the Lost Ark","Adventure"],["Chariots of Fire","Drama"],["An American Werewolf in London","Horror"],["Time Bandits","Comedy"],["Das Boot","Drama"]],
+  1982: [["E.T. the Extra-Terrestrial","Sci-Fi"],["Blade Runner","Sci-Fi"],["The Thing","Horror"],["Poltergeist","Horror"],["Tootsie","Comedy"]],
+  1983: [["Scarface","Action"],["Return of the Jedi","Sci-Fi"],["A Christmas Story","Comedy"],["The Right Stuff","Drama"],["WarGames","Thriller"]],
+  1984: [["The Terminator","Sci-Fi"],["Ghostbusters","Comedy"],["The Karate Kid","Action"],["A Nightmare on Elm Street","Horror"],["Beverly Hills Cop","Comedy"]],
+  1985: [["Back to the Future","Sci-Fi"],["The Breakfast Club","Drama"],["The Goonies","Adventure"],["Rocky IV","Action"],["Commando","Action"]],
+  1986: [["Top Gun","Action"],["Ferris Bueller's Day Off","Comedy"],["Aliens","Sci-Fi"],["Stand by Me","Drama"],["The Fly","Horror"]],
+  1987: [["The Princess Bride","Adventure"],["Full Metal Jacket","Drama"],["Predator","Action"],["RoboCop","Sci-Fi"],["Lethal Weapon","Action"]],
+  1988: [["Die Hard","Action"],["Rain Man","Drama"],["Who Framed Roger Rabbit","Animation"],["Beetlejuice","Comedy"],["Big","Comedy"]],
+  1989: [["Batman","Action"],["Indiana Jones and the Last Crusade","Adventure"],["The Little Mermaid","Animation"],["Dead Poets Society","Drama"],["When Harry Met Sally","Romance"]],
+  1990: [["Home Alone","Comedy"],["Goodfellas","Drama"],["Edward Scissorhands","Romance"],["Total Recall","Sci-Fi"],["Ghost","Romance"]],
+  1991: [["The Silence of the Lambs","Thriller"],["Terminator 2: Judgment Day","Action"],["Beauty and the Beast","Animation"],["JFK","Drama"],["Point Break","Action"]],
+  1992: [["Aladdin","Animation"],["Reservoir Dogs","Thriller"],["A Few Good Men","Drama"],["Unforgiven","Action"],["Wayne's World","Comedy"]],
+  1993: [["Jurassic Park","Sci-Fi"],["Schindler's List","Drama"],["Groundhog Day","Comedy"],["The Fugitive","Thriller"],["Mrs. Doubtfire","Comedy"]],
+  1994: [["The Lion King","Animation"],["Pulp Fiction","Thriller"],["Forrest Gump","Drama"],["The Shawshank Redemption","Drama"],["Speed","Action"]],
+  1995: [["Toy Story","Animation"],["Se7en","Thriller"],["Braveheart","Action"],["Heat","Action"],["Clueless","Comedy"]],
+  1996: [["Independence Day","Sci-Fi"],["Fargo","Thriller"],["Scream","Horror"],["Mission: Impossible","Action"],["Trainspotting","Drama"]],
+  1997: [["Titanic","Romance"],["Good Will Hunting","Drama"],["L.A. Confidential","Thriller"],["The Fifth Element","Sci-Fi"],["Men in Black","Comedy"]],
+  1998: [["Saving Private Ryan","Action"],["The Truman Show","Drama"],["The Big Lebowski","Comedy"],["There's Something About Mary","Comedy"],["Armageddon","Action"]],
+  1999: [["The Matrix","Sci-Fi"],["Fight Club","Thriller"],["The Sixth Sense","Horror"],["American Beauty","Drama"],["The Mummy","Adventure"]],
+  2000: [["Gladiator","Action"],["Memento","Thriller"],["Cast Away","Drama"],["X-Men","Action"],["Snatch","Comedy"]],
+  2001: [["Harry Potter and the Philosopher's Stone","Adventure"],["The Lord of the Rings: The Fellowship of the Ring","Adventure"],["Shrek","Animation"],["A Beautiful Mind","Drama"],["Ocean's Eleven","Comedy"]],
+  2002: [["Spider-Man","Action"],["The Lord of the Rings: The Two Towers","Adventure"],["Catch Me If You Can","Drama"],["Harry Potter and the Chamber of Secrets","Adventure"],["Ice Age","Animation"]],
+  2003: [["Finding Nemo","Animation"],["The Lord of the Rings: The Return of the King","Adventure"],["Pirates of the Caribbean: The Curse of the Black Pearl","Adventure"],["Kill Bill: Vol. 1","Action"],["Elf","Comedy"]],
+  2004: [["The Incredibles","Animation"],["Shrek 2","Animation"],["Harry Potter and the Prisoner of Azkaban","Adventure"],["Spider-Man 2","Action"],["Eternal Sunshine of the Spotless Mind","Romance"]],
+  2005: [["Batman Begins","Action"],["Harry Potter and the Goblet of Fire","Adventure"],["Star Wars: Episode III","Sci-Fi"],["War of the Worlds","Sci-Fi"],["Sin City","Action"]],
+  2006: [["Cars","Animation"],["The Departed","Thriller"],["Casino Royale","Action"],["Pirates of the Caribbean: Dead Man's Chest","Adventure"],["The Prestige","Thriller"]],
+  2007: [["Ratatouille","Animation"],["No Country for Old Men","Thriller"],["Harry Potter and the Order of the Phoenix","Adventure"],["Superbad","Comedy"],["300","Action"]],
+  2008: [["The Dark Knight","Action"],["WALL-E","Animation"],["Iron Man","Action"],["Kung Fu Panda","Animation"],["Slumdog Millionaire","Drama"]],
+  2009: [["Avatar","Sci-Fi"],["Up","Animation"],["Inglourious Basterds","Action"],["The Hangover","Comedy"],["District 9","Sci-Fi"]],
+  2010: [["Inception","Sci-Fi"],["Toy Story 3","Animation"],["The Social Network","Drama"],["Harry Potter and the Deathly Hallows Part 1","Adventure"],["Shutter Island","Thriller"]],
+  2011: [["Harry Potter and the Deathly Hallows Part 2","Adventure"],["The Help","Drama"],["Rise of the Planet of the Apes","Sci-Fi"],["Drive","Thriller"],["Hugo","Adventure"]],
+  2012: [["The Avengers","Action"],["The Dark Knight Rises","Action"],["Skyfall","Action"],["Django Unchained","Action"],["The Hunger Games","Sci-Fi"]],
+  2013: [["Frozen","Animation"],["Gravity","Sci-Fi"],["The Wolf of Wall Street","Comedy"],["12 Years a Slave","Drama"],["The Hunger Games: Catching Fire","Sci-Fi"]],
+  2014: [["Guardians of the Galaxy","Action"],["Interstellar","Sci-Fi"],["The Lego Movie","Animation"],["Gone Girl","Thriller"],["Big Hero 6","Animation"]],
+  2015: [["Star Wars: The Force Awakens","Sci-Fi"],["Mad Max: Fury Road","Action"],["Inside Out","Animation"],["The Martian","Sci-Fi"],["Jurassic World","Action"]],
+  2016: [["Moana","Animation"],["Deadpool","Action"],["Zootopia","Animation"],["Rogue One","Sci-Fi"],["Doctor Strange","Action"]],
+  2017: [["Spider-Man: Homecoming","Action"],["Thor: Ragnarok","Action"],["Get Out","Horror"],["Coco","Animation"],["Wonder Woman","Action"]],
+  2018: [["Avengers: Infinity War","Action"],["Black Panther","Action"],["Spider-Man: Into the Spider-Verse","Animation"],["A Quiet Place","Horror"],["Bohemian Rhapsody","Drama"]],
+  2019: [["Avengers: Endgame","Action"],["Joker","Thriller"],["Parasite","Thriller"],["Toy Story 4","Animation"],["Knives Out","Thriller"]],
+  2020: [["Soul","Animation"],["Tenet","Sci-Fi"],["Onward","Animation"],["The Invisible Man","Horror"],["Palm Springs","Comedy"]],
+  2021: [["Spider-Man: No Way Home","Action"],["Dune","Sci-Fi"],["Shang-Chi","Action"],["No Time to Die","Action"],["Encanto","Animation"]],
+  2022: [["Top Gun: Maverick","Action"],["Everything Everywhere All at Once","Sci-Fi"],["The Batman","Action"],["Black Panther: Wakanda Forever","Action"],["Glass Onion","Thriller"]],
+  2023: [["Barbie","Comedy"],["Oppenheimer","Drama"],["Guardians of the Galaxy Vol. 3","Action"],["Spider-Man: Across the Spider-Verse","Animation"],["John Wick: Chapter 4","Action"]],
+  2024: [["Inside Out 2","Animation"],["Dune: Part Two","Sci-Fi"],["Deadpool & Wolverine","Action"],["Wicked","Musical"],["Gladiator II","Action"]],
+  2025: [["Captain America: Brave New World","Action"],["Paddington in Peru","Comedy"],["The Brutalist","Drama"],["Mickey 17","Sci-Fi"],["Thunderbolts*","Action"]],
 };
 
 const knownMundart = {
@@ -550,13 +556,24 @@ async function searchItems(query) {
     const resp = await fetch(url);
     const data = await resp.json();
     if (!data.Search) return [];
-    return data.Search.map(r => ({
-      name: r.Title,
-      artist: '',
-      year: parseInt(r.Year) || 0,
-      artwork: r.Poster !== 'N/A' ? r.Poster : '',
-      imdbId: r.imdbID || '',
+    // Fetch genre for each result in parallel
+    const items = await Promise.all(data.Search.slice(0, 10).map(async r => {
+      let genre = '';
+      try {
+        const detail = await fetch(`https://www.omdbapi.com/?i=${r.imdbID}&apikey=trilogy`);
+        const d = await detail.json();
+        genre = d.Genre ? d.Genre.split(',')[0].trim() : '';
+      } catch(e) {}
+      return {
+        name: r.Title,
+        artist: '',
+        year: parseInt(r.Year) || 0,
+        artwork: r.Poster !== 'N/A' ? r.Poster : '',
+        imdbId: r.imdbID || '',
+        genre,
+      };
     }));
+    return items;
   }
 }
 
@@ -569,8 +586,8 @@ function renderResults(results) {
       const div = document.createElement('div');
       div.className = 'item';
       const artworkHtml = item.artwork ? `<img src="${item.artwork}" alt="">` : '';
-      const artistHtml = item.artist ? `<span class="meta">${item.artist}</span>` : '';
-      div.innerHTML = `${artworkHtml}<div class="info"><div class="title">${item.name}</div>${artistHtml}</div><span class="year-tag">${item.year}</span>`;
+      const metaHtml = item.artist ? `<span class="meta">${item.artist}</span>` : (item.genre ? `<span class="meta">${item.genre}</span>` : '');
+      div.innerHTML = `${artworkHtml}<div class="info"><div class="title">${item.name}</div>${metaHtml}</div><span class="year-tag">${item.year}</span>`;
       div.addEventListener('mousedown', (e) => {
         e.preventDefault();
         selectItem(item);
@@ -613,7 +630,7 @@ function getEquivList() {
   return knownSongs;
 }
 
-function findEquivalent(year) {
+function findEquivalent(year, genre) {
   const known = getEquivList();
   let targetYear = year;
   if (!known[year]) {
@@ -625,8 +642,17 @@ function findEquivalent(year) {
     targetYear = best;
   }
   const list = known[targetYear];
+  // For movies, try to match by genre first
+  if (currentType === 'movie' && genre) {
+    const genreLower = genre.toLowerCase();
+    const genreMatches = list.filter(m => m[1] && m[1].toLowerCase() === genreLower);
+    if (genreMatches.length > 0) {
+      const pick = genreMatches[Math.floor(Math.random() * genreMatches.length)];
+      return { name: pick[0], artist: pick[1] || '', year: targetYear, genre: pick[1] || '' };
+    }
+  }
   const pick = list[Math.floor(Math.random() * list.length)];
-  return { name: pick[0], artist: pick[1] || '', year: targetYear };
+  return { name: pick[0], artist: pick[1] || '', year: targetYear, genre: (currentType === 'movie' ? pick[1] : '') || '' };
 }
 
 async function fetchMediaData(name, artist, type) {
@@ -692,7 +718,8 @@ async function calculate() {
   const ageDiff = childYear - pickedYear;
   const equivalentYear = parentYear - ageDiff;
 
-  const equivalent = findEquivalent(equivalentYear);
+  const pickedGenre = picked.genre || '';
+  const equivalent = findEquivalent(equivalentYear, pickedGenre);
 
   const res = document.getElementById('result');
   res.style.display = 'block';
@@ -709,6 +736,7 @@ async function calculate() {
   document.getElementById('pickedName').textContent = picked.name;
   document.getElementById('pickedArtist').textContent = picked.artist || '';
   document.getElementById('pickedYear').textContent = pickedYear;
+  document.getElementById('pickedYear').innerHTML = pickedYear + (pickedGenre ? ` <span class="genre-tag">${pickedGenre}</span>` : '');
 
   // Picked actions
   const pickedActions = document.getElementById('pickedActions');
@@ -726,7 +754,7 @@ async function calculate() {
   document.getElementById('equivArt').style.display = 'none';
   document.getElementById('equivName').textContent = equivalent.name;
   document.getElementById('equivArtist').textContent = equivalent.artist || '';
-  document.getElementById('equivYear').textContent = equivalent.year;
+  document.getElementById('equivYear').innerHTML = equivalent.year + (equivalent.genre ? ` <span class="genre-tag">${equivalent.genre}</span>` : '');
   document.getElementById('equivActions').innerHTML = '';
   document.getElementById('equivPlayer').innerHTML = '';
 
